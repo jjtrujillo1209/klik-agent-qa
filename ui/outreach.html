@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Outreach · Klik Energy</title>
+<style>
+:root {
+  --bg:#070d1a;--s1:#0f1929;--s2:#1a2640;--border:#1e3a5f;
+  --li:#0a66c2;--li-dim:#0854a0;--green:#00b87a;--red:#ff4757;
+  --orange:#ffa502;--purple:#8b5cf6;--text:#e8f0fe;--dim:#7f9cc0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+.header{background:linear-gradient(135deg,#0a1628,#0f2044);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:38px;height:38px;border-radius:8px;background:var(--li);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:white;}
+.logo-text{font-size:17px;font-weight:700;}
+.logo-sub{font-size:11px;color:var(--dim);margin-top:1px;}
+.auth-badge{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:12px;border:1px solid;}
+.auth-badge.ok{border-color:var(--green);color:var(--green);background:rgba(0,184,122,.08);}
+.auth-badge.bad{border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08);}
+.auth-dot{width:7px;height:7px;border-radius:50%;}
+.auth-badge.ok .auth-dot{background:var(--green);animation:pulse 2s infinite;}
+.auth-badge.bad .auth-dot{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.stepper{display:flex;align-items:center;justify-content:center;gap:0;padding:0 28px;height:64px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
+.step-item{display:flex;align-items:center;}
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--dim);transition:all .3s;flex-shrink:0;}
+.step-circle.active{border-color:var(--li);color:white;background:var(--li);}
+.step-circle.done{border-color:var(--green);background:var(--green);color:white;}
+.step-label{font-size:12px;color:var(--dim);margin-left:8px;white-space:nowrap;transition:color .3s;}
+.step-item.active .step-label{color:var(--text);font-weight:600;}
+.step-item.done .step-label{color:var(--green);}
+.step-line{width:48px;height:2px;background:var(--border);margin:0 8px;transition:background .3s;flex-shrink:0;}
+.step-line.done{background:var(--green);}
+
+.main{flex:1;display:flex;overflow:hidden;}
+
+.left-panel{width:360px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.panel-header{padding:16px 20px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim);}
+
+.upload-zone{margin:20px;border:2px dashed var(--border);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .25s;position:relative;}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--li);background:rgba(10,102,194,.07);}
+.upload-icon{font-size:36px;margin-bottom:12px;}
+.upload-title{font-size:15px;font-weight:600;margin-bottom:6px;}
+.upload-sub{font-size:12px;color:var(--dim);}
+
+.company-list{flex:1;overflow-y:auto;padding:0 12px 12px;}
+.company-list::-webkit-scrollbar{width:4px;}
+.company-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.company-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;margin-bottom:4px;background:var(--s2);font-size:12px;border:1px solid transparent;}
+.company-row.searching{border-color:rgba(10,102,194,.4);background:rgba(10,102,194,.08);}
+.company-row.done{border-color:rgba(0,184,122,.3);}
+
+.stats-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px;border-top:1px solid var(--border);}
+.stat{background:var(--s2);border-radius:8px;padding:10px;text-align:center;}
+.stat-n{font-size:22px;font-weight:700;color:var(--li);}
+.stat-lbl{font-size:10px;color:var(--dim);margin-top:2px;}
+
+.right-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+.toolbar{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--s1);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.toolbar-title{font-size:13px;font-weight:600;flex:1;}
+.select-ctrl{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer;}
+.btn{padding:8px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-primary{background:var(--li);color:white;}
+.btn-primary:hover{background:var(--li-dim);transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-danger{background:var(--red);color:white;display:none;}
+.btn-ghost{background:var(--s2);color:var(--dim);border:1px solid var(--border);padding:8px 14px;}
+.btn-ghost:hover{color:var(--text);border-color:var(--dim);}
+.download-link{display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap;}
+
+.contacts-wrap{flex:1;overflow-y:auto;}
+.contacts-wrap::-webkit-scrollbar{width:5px;}
+.contacts-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.contacts-table{width:100%;border-collapse:collapse;}
+.contacts-table thead{position:sticky;top:0;z-index:2;}
+.contacts-table th{background:var(--s1);padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);text-align:left;border-bottom:1px solid var(--border);}
+.contacts-table td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(30,58,95,.5);vertical-align:middle;}
+.contacts-table tr{transition:background .15s;cursor:pointer;}
+.contacts-table tr:hover td{background:rgba(10,102,194,.06);}
+
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--li),var(--purple));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;}
+.msg-preview{font-size:12px;color:var(--dim);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;}
+.badge-queued{background:rgba(127,156,192,.12);color:var(--dim);}
+.badge-sending{background:rgba(10,102,194,.15);color:#60a5fa;}
+.badge-sent{background:rgba(0,184,122,.12);color:var(--green);}
+.badge-failed{background:rgba(255,71,87,.12);color:var(--red);}
+.badge-skipped{background:rgba(255,165,2,.1);color:var(--orange);}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.badge-sending .badge-dot{animation:pulse 1s infinite;}
+
+.search-progress{padding:12px 20px;border-bottom:1px solid var(--border);display:none;}
+.search-progress.active{display:block;}
+.progress-label{font-size:12px;color:var(--dim);margin-bottom:6px;}
+.progress-bar{height:5px;background:var(--s2);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--li),var(--purple));border-radius:3px;width:0%;transition:width .4s;}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--dim);gap:12px;}
+.empty-icon{font-size:48px;opacity:.4;}
+.empty-text{font-size:14px;}
+
+.editor-overlay{position:fixed;inset:0;background:rgba(7,13,26,.75);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
+.editor-overlay.open{display:flex;}
+.editor-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;width:520px;padding:28px;animation:pop-in .25s ease;}
+@keyframes pop-in{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.editor-name{font-size:15px;font-weight:700;}
+.editor-meta{font-size:12px;color:var(--dim);}
+.editor-label{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 8px;}
+.editor-textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;padding:12px 14px;resize:vertical;min-height:130px;max-height:220px;font-family:inherit;line-height:1.5;}
+.editor-textarea:focus{outline:none;border-color:var(--li);}
+.char-count{font-size:12px;color:var(--dim);}
+.char-count.warn{color:var(--orange);}
+.char-count.over{color:var(--red);}
+
+.log-panel{height:160px;border-top:1px solid var(--border);flex-shrink:0;background:#040910;overflow-y:auto;padding:8px 16px;font-family:'SF Mono','Fira Code',monospace;font-size:11px;}
+.log-panel::-webkit-scrollbar{width:4px;}
+.log-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.log-entry{padding:2px 0;border-bottom:1px solid rgba(30,58,95,.3);}
+.log-time{color:#3a5a8a;margin-right:8px;}
+.log-info{color:#60a5fa;}
+.log-ok{color:var(--green);}
+.log-warn{color:var(--orange);}
+.log-err{color:var(--red);}
+
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Email Composer ─────────────────────────────────────────────────────────── */
+.email-overlay{position:fixed;inset:0;background:rgba(7,13,26,.88);display:none;align-items:flex-start;justify-content:center;z-index:200;backdrop-filter:blur(6px);overflow-y:auto;padding:32px 20px;}
+.email-overlay.open{display:flex;}
+.email-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;width:700px;max-width:100%;padding:32px;animation:pop-in .25s ease;position:relative;margin:auto;}
+.email-card-title{font-size:17px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+.email-section{margin-bottom:18px;}
+.email-lbl{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;}
+.email-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:9px 12px;font-family:inherit;}
+.email-input:focus{outline:none;border-color:var(--li);}
+.email-select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:9px 12px;cursor:pointer;font-family:inherit;}
+.email-select:focus{outline:none;border-color:var(--li);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tpl-toggle{display:flex;gap:8px;}
+.tpl-btn{flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:10px;background:var(--s2);color:var(--dim);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
+.tpl-btn:hover{border-color:rgba(10,102,194,.5);color:var(--text);}
+.tpl-btn.active{border-color:var(--li);color:var(--text);background:rgba(10,102,194,.14);}
+.email-subject-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;}
+.email-body{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;padding:14px 16px;resize:vertical;height:340px;font-family:inherit;line-height:1.75;}
+.email-body:focus{outline:none;border-color:var(--li);}
+.email-body[readonly]{opacity:.9;}
+.email-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;align-items:center;}
+.btn-copy-body{background:var(--s2);color:var(--text);border:1px solid var(--border);}
+.btn-copy-body:hover{border-color:var(--green);color:var(--green);}
+.btn-copy-all{background:var(--green);color:white;}
+.btn-copy-all:hover{filter:brightness(1.1);}
+.copy-toast{font-size:12px;color:var(--green);margin-right:auto;opacity:0;transition:opacity .3s;}
+.copy-toast.show{opacity:1;}
+.editable-toggle{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--dim);cursor:pointer;}
+.editable-toggle input{cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">in</div>
+    <div>
+      <div class="logo-text">LinkedIn Outreach</div>
+      <div class="logo-sub">Klik Energy · Mercado No Regulado</div>
+    </div>
+  </div>
+  <div class="auth-badge bad" id="authBadge">
+    <div class="auth-dot"></div>
+    <span id="authText">Sin sesión LinkedIn</span>
+  </div>
+</div>
+
+<div class="stepper">
+  <div class="step-item active" id="si1"><div class="step-circle active" id="sc1">1</div><div class="step-label">Cargar CSV</div></div>
+  <div class="step-line" id="sl1"></div>
+  <div class="step-item" id="si2"><div class="step-circle" id="sc2">2</div><div class="step-label">Buscar en LinkedIn</div></div>
+  <div class="step-line" id="sl2"></div>
+  <div class="step-item" id="si3"><div class="step-circle" id="sc3">3</div><div class="step-label">Revisar mensajes</div></div>
+  <div class="step-line" id="sl3"></div>
+  <div class="step-item" id="si4"><div class="step-circle" id="sc4">4</div><div class="step-label">Enviar conexiones</div></div>
+</div>
+
+<div class="main">
+  <div class="left-panel">
+    <div class="panel-header">📋 Empresas del CSV</div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept=".csv" style="display:none">
+      <div class="upload-icon">📂</div>
+      <div class="upload-title">Arrastra tu CSV aquí</div>
+      <div class="upload-sub">o haz clic para buscar<br><br>Columnas: nombre_empresa, nit</div>
+    </div>
+
+    <div class="company-list" id="companyList"></div>
+
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-n" id="statEmpresas">0</div><div class="stat-lbl">Empresas</div></div>
+      <div class="stat"><div class="stat-n" id="statContactos" style="color:var(--green)">0</div><div class="stat-lbl">Contactos</div></div>
+      <div class="stat"><div class="stat-n" id="statEnviados" style="color:var(--purple)">0</div><div class="stat-lbl">Enviados</div></div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="toolbar">
+      <span class="toolbar-title" id="toolbarTitle">Carga un CSV para comenzar</span>
+      <select class="select-ctrl" id="limitSelect">
+        <option value="5">5/día</option>
+        <option value="10">10/día</option>
+        <option value="15" selected>15/día ✓</option>
+        <option value="20">20/día (máx)</option>
+      </select>
+      <button class="btn btn-ghost" id="btnSearch" onclick="startSearch()" style="display:none">🔍 Buscar decisores</button>
+      <button class="btn btn-ghost" onclick="openEmailComposer()" title="Compositor de emails">✉️ Email</button>
+      <a class="btn btn-ghost download-link" href="/docs/klik_procesos_whatsapp_llamada.html" target="_blank" title="Ver procesos WhatsApp y llamada">▣ Procesos</a>
+      <a class="btn btn-ghost download-link" href="/docs/klik_whatsapp_asesor_energetico.md" download title="Descargar guia WhatsApp">⬇ WhatsApp MD</a>
+      <a class="btn btn-ghost download-link" href="/docs/klik_llamada_asesor_energetico.md" download title="Descargar guia llamada">⬇ Llamada MD</a>
+      <button class="btn btn-primary" id="btnSend" onclick="startSend()" style="display:none">🚀 Enviar conexiones</button>
+      <button class="btn btn-danger" id="btnStop" onclick="stopAll()">⏹ Detener</button>
+    </div>
+
+    <div class="search-progress" id="searchProgress">
+      <div class="progress-label" id="progressLabel">Buscando...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="contacts-wrap" id="contactsWrap">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">👥</div>
+        <div class="empty-text">Los contactos aparecerán aquí después de buscar en LinkedIn</div>
+      </div>
+      <table class="contacts-table" id="contactsTable" style="display:none">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Persona</th>
+            <th>Empresa</th>
+            <th>Mensaje</th>
+            <th>LinkedIn</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="contactsTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="log-panel" id="logPanel"></div>
+  </div>
+</div>
+
+<!-- Email Composer -->
+<div class="email-overlay" id="emailOverlay">
+  <div class="email-card">
+    <button onclick="closeEmailComposer()" style="position:absolute;top:18px;right:20px;background:none;border:none;color:var(--dim);font-size:22px;cursor:pointer;line-height:1;padding:0">×</button>
+    <div class="email-card-title">✉️ Compositor de Email · Klik Energy</div>
+
+    <!-- Contacto -->
+    <div class="email-section">
+      <div class="email-lbl">Seleccionar contacto (o ingresar manualmente)</div>
+      <select class="email-select" id="emailContactSel" onchange="onEmailContactSelected()">
+        <option value="">— Manual (ingresar nombre y empresa) —</option>
+      </select>
+    </div>
+
+    <!-- Nombre + Empresa -->
+    <div class="two-col" style="margin-bottom:18px">
+      <div>
+        <div class="email-lbl">Primer nombre</div>
+        <input class="email-input" id="emailFirstName" placeholder="ej. Julián" oninput="regenEmail()">
+      </div>
+      <div>
+        <div class="email-lbl">Empresa</div>
+        <input class="email-input" id="emailCompany" placeholder="ej. Caracol" oninput="regenEmail()">
+      </div>
+    </div>
+
+    <!-- Situación -->
+    <div class="email-section">
+      <div class="email-lbl">Situación</div>
+      <div class="tpl-toggle">
+        <button class="tpl-btn active" id="tplBtnNo" onclick="setEmailTpl('no_conn')">🔗 Sin conexión LinkedIn</button>
+        <button class="tpl-btn" id="tplBtnYes" onclick="setEmailTpl('conn')">✅ Con conexión LinkedIn</button>
+      </div>
+    </div>
+
+    <!-- Asunto -->
+    <div class="email-section">
+      <div class="email-lbl">Asunto del correo</div>
+      <div class="email-subject-row">
+        <input class="email-input" id="emailSubject" value="Optimización energética | Klik ⚡">
+        <button class="btn btn-ghost" onclick="copyEmailSubject()" style="white-space:nowrap">⎘ Copiar asunto</button>
+      </div>
+    </div>
+
+    <!-- Cuerpo -->
+    <div class="email-section">
+      <div class="email-lbl">
+        <span>Cuerpo del email</span>
+        <label class="editable-toggle">
+          <input type="checkbox" id="emailEditCheck" onchange="toggleEmailEditable()"> Editar manualmente
+        </label>
+      </div>
+      <textarea class="email-body" id="emailBody" readonly></textarea>
+    </div>
+
+    <!-- Acciones -->
+    <div class="email-actions">
+      <span class="copy-toast" id="copyToast">✓ Copiado al portapapeles</span>
+      <button class="btn btn-ghost" onclick="closeEmailComposer()">Cerrar</button>
+      <button class="btn btn-copy-body btn" onclick="copyEmailBody()">⎘ Copiar cuerpo</button>
+      <button class="btn btn-copy-all btn" onclick="copyEmailAll()">⎘ Copiar todo (asunto + cuerpo)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Message editor -->
+<div class="editor-overlay" id="editorOverlay">
+  <div class="editor-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <div class="avatar" id="edAvatar">?</div>
+      <div>
+        <div class="editor-name" id="edName"></div>
+        <div class="editor-meta" id="edMeta"></div>
+      </div>
+    </div>
+    <div class="editor-label">✏️ Connection request (máx 300 caracteres)</div>
+    <textarea class="editor-textarea" id="edTextarea" oninput="onMsgInput()"></textarea>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px">
+      <span class="char-count" id="charCount">0 / 300</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="closeEditor()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveMessage()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Utilidades ────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const HOST    = window.location.hostname || 'localhost';
+const PORT    = 8766;
+const SESSION = 's_' + Math.random().toString(36).substr(2, 9);
+let ws, contacts = [], companies = [], editingId = null, sentCount = 0;
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+function connect() {
+  ws = new WebSocket('ws://' + HOST + ':' + PORT + '/ws/' + SESSION);
+  ws.onopen    = () => log('Conectado al servidor', 'info');
+  ws.onclose   = () => { log('Desconectado. Reconectando...', 'warn'); setTimeout(connect, 3000); };
+  ws.onerror   = () => log('Error de conexión', 'err');
+  ws.onmessage = e => handle(JSON.parse(e.data));
+}
+function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+// ── Handlers ──────────────────────────────────────────────────────────────────
+function handle(d) {
+  const t = d.type;
+
+  if (t === 'connected') {
+    const ok = !!d.linkedin_auth;
+    const badge = document.getElementById('authBadge');
+    badge.className = 'auth-badge ' + (ok ? 'ok' : 'bad');
+    document.getElementById('authText').textContent = ok ? 'LinkedIn autenticado' : 'Sin sesión LinkedIn';
+    log(ok ? '✅ Sesión LinkedIn activa' : '⚠️  Sin sesión — ejecuta: python setup_linkedin_auth.py', ok ? 'ok' : 'warn');
+  }
+
+  else if (t === 'csv_parsed') {
+    companies = d.companies;
+    document.getElementById('statEmpresas').textContent = companies.length;
+    document.getElementById('btnSearch').style.display = 'block';
+    document.getElementById('toolbarTitle').textContent = companies.length + ' empresas cargadas — listo para buscar decisores';
+    renderCompanies(companies);
+    log('📋 ' + companies.length + ' empresas parseadas del CSV', 'ok');
+    setStep(2);
+  }
+
+  else if (t === 'search_start') {
+    document.getElementById('searchProgress').classList.add('active');
+    document.getElementById('btnSearch').disabled = true;
+    document.getElementById('btnStop').style.display = 'block';
+    log('🔍 Buscando decisores para ' + d.total + ' empresas en LinkedIn...', 'info');
+  }
+
+  else if (t === 'search_progress') {
+    const pct = Math.round((d.current / d.total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = '[' + d.current + '/' + d.total + '] ' + d.company;
+    const key = slugify(d.company);
+    const row = document.getElementById('cr-' + key);
+    if (row) { row.classList.add('searching'); row.querySelector('.cstatus').textContent = '⏳'; }
+  }
+
+  else if (t === 'contact_found') {
+    const c = d.contact;
+    contacts.push(c);
+    addContactRow(c, contacts.length);
+    document.getElementById('statContactos').textContent = contacts.length;
+    document.getElementById('contactsTable').style.display = 'table';
+    document.getElementById('emptyState').style.display   = 'none';
+    const row = document.getElementById('cr-' + slugify(c.company));
+    if (row) { row.classList.remove('searching'); row.classList.add('done'); row.querySelector('.cstatus').textContent = '✓'; }
+    log('👤 ' + c.name + ' · ' + c.title + ' @ ' + c.company, 'ok');
+  }
+
+  else if (t === 'search_complete') {
+    document.getElementById('searchProgress').classList.remove('active');
+    document.getElementById('btnSearch').style.display = 'none';
+    document.getElementById('btnSearch').disabled = false;
+    document.getElementById('btnStop').style.display = 'none';
+    document.getElementById('btnSend').style.display = 'block';
+    document.getElementById('toolbarTitle').textContent = d.total + ' contactos — haz clic en una fila para editar el mensaje';
+    log('✅ Búsqueda completa: ' + d.total + ' contactos encontrados', 'ok');
+    setStep(3);
+  }
+
+  else if (t === 'send_start') {
+    document.getElementById('btnSend').disabled = true;
+    document.getElementById('btnSend').innerHTML = '<span class="spin"></span>Enviando...';
+    document.getElementById('btnStop').style.display = 'block';
+    log('🚀 Enviando ' + d.total + ' connection requests (límite: ' + d.limit + '/día)', 'info');
+    setStep(4);
+  }
+
+  else if (t === 'outreach_progress') {
+    const icon = d.result === 'sent' ? '✅' : d.result === 'skipped' ? '⏭️' : '❌';
+    log(icon + ' [' + d.sent + '/' + d.total + '] ' + d.current_name, d.result === 'sent' ? 'ok' : d.result === 'failed' ? 'err' : 'warn');
+    updateBadge(d.current_name, d.result);
+    if (d.result === 'sent') { sentCount++; document.getElementById('statEnviados').textContent = sentCount; }
+  }
+
+  else if (t === 'outreach_complete') {
+    const s = d.summary;
+    document.getElementById('btnSend').style.display = 'none';
+    document.getElementById('btnStop').style.display = 'none';
+    log('🎉 Completado: ' + s.sent + ' enviados · ' + s.skipped + ' saltados · ' + s.failed + ' fallidos', 'ok');
+  }
+
+  else if (t === 'agent_log') {
+    log(d.message, d.level === 'warn' ? 'warn' : d.level === 'error' ? 'err' : 'info');
+  }
+
+  else if (t === 'stopped') {
+    document.getElementById('btnSearch').disabled = false;
+    document.getElementById('btnSend').disabled  = false;
+    document.getElementById('btnSend').innerHTML = '🚀 Enviar conexiones';
+    document.getElementById('btnStop').style.display = 'none';
+    log('⏹️ Operación detenida', 'warn');
+  }
+
+  else if (t === 'error') {
+    log('❌ ' + d.message, 'err');
+  }
+}
+
+// ── CSV upload ────────────────────────────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  if (e.target.files[0]) readFile(e.target.files[0]);
+});
+
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+});
+
+function readFile(file) {
+  const r = new FileReader();
+  r.onload = e => { log('📂 ' + file.name + ' cargado', 'info'); send({ type: 'parse_csv', content: e.target.result }); };
+  r.readAsText(file, 'utf-8');
+}
+
+// ── Render companies ──────────────────────────────────────────────────────────
+function slugify(s) { return s.replace(/[^a-zA-Z0-9]/g,'_').substring(0, 24); }
+
+function renderCompanies(list) {
+  const el = document.getElementById('companyList');
+  el.textContent = '';
+  list.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'company-row';
+    row.id = 'cr-' + slugify(c.name);
+
+    const num = document.createElement('span');
+    num.style.cssText = 'color:var(--dim);font-size:11px;flex-shrink:0';
+    num.textContent = i + 1;
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;overflow:hidden';
+
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    nameEl.textContent = c.name;
+
+    const nitEl = document.createElement('div');
+    nitEl.style.cssText = 'font-size:10px;color:var(--dim)';
+    nitEl.textContent = 'NIT: ' + (c.nit || '—');
+
+    const status = document.createElement('span');
+    status.className = 'cstatus';
+    status.style.cssText = 'font-size:11px;color:var(--dim);flex-shrink:0';
+    status.textContent = '○';
+
+    info.appendChild(nameEl);
+    info.appendChild(nitEl);
+    row.appendChild(num);
+    row.appendChild(info);
+    row.appendChild(status);
+    el.appendChild(row);
+  });
+}
+
+// ── Render contact row ────────────────────────────────────────────────────────
+function addContactRow(c, n) {
+  const tbody = document.getElementById('contactsTbody');
+  const tr = document.createElement('tr');
+  tr.id = 'row-' + c.id;
+  tr.addEventListener('click', () => openEditor(c.id));
+
+  const initials = (c.name || '?').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+
+  // #
+  const tdN = document.createElement('td');
+  tdN.style.cssText = 'color:var(--dim);font-size:11px';
+  tdN.textContent = n;
+
+  // Persona
+  const tdP = document.createElement('td');
+  const pWrap = document.createElement('div');
+  pWrap.style.cssText = 'display:flex;align-items:center;gap:10px';
+  const av = document.createElement('div');
+  av.className = 'avatar';
+  av.textContent = initials;
+  const pInfo = document.createElement('div');
+  const pName = document.createElement('div');
+  pName.style.cssText = 'font-weight:600;font-size:13px';
+  pName.textContent = c.name || '—';
+  const pTitle = document.createElement('div');
+  pTitle.style.cssText = 'font-size:11px;color:var(--dim)';
+  pTitle.textContent = c.title || '—';
+  pInfo.appendChild(pName);
+  pInfo.appendChild(pTitle);
+  pWrap.appendChild(av);
+  pWrap.appendChild(pInfo);
+  tdP.appendChild(pWrap);
+
+  // Empresa (del CSV)
+  const tdE = document.createElement('td');
+  tdE.style.cssText = 'font-size:12px;color:var(--dim)';
+  tdE.textContent = c.company;
+
+  // Mensaje
+  const tdM = document.createElement('td');
+  const msgEl = document.createElement('div');
+  msgEl.className = 'msg-preview';
+  msgEl.id = 'msg-' + c.id;
+  msgEl.textContent = c.message || '—';
+  tdM.appendChild(msgEl);
+
+  // LinkedIn
+  const tdL = document.createElement('td');
+  if (c.linkedin_url) {
+    const a = document.createElement('a');
+    a.href = c.linkedin_url;
+    a.target = '_blank';
+    a.style.cssText = 'font-size:11px;color:var(--li);text-decoration:none';
+    a.textContent = 'Ver perfil →';
+    a.addEventListener('click', e => e.stopPropagation());
+    tdL.appendChild(a);
+  } else {
+    tdL.style.cssText = 'color:var(--dim);font-size:11px';
+    tdL.textContent = '—';
+  }
+
+  // Estado
+  const tdS = document.createElement('td');
+  const badge = document.createElement('span');
+  badge.className = 'badge badge-queued';
+  badge.id = 'badge-' + c.id;
+  const dot = document.createElement('span');
+  dot.className = 'badge-dot';
+  badge.appendChild(dot);
+  badge.appendChild(document.createTextNode(' En cola'));
+  tdS.appendChild(badge);
+
+  tr.appendChild(tdN);
+  tr.appendChild(tdP);
+  tr.appendChild(tdE);
+  tr.appendChild(tdM);
+  tr.appendChild(tdL);
+  tr.appendChild(tdS);
+  tbody.appendChild(tr);
+}
+
+function updateBadge(name, result) {
+  const c = contacts.find(x => x.name === name);
+  if (!c) return;
+  const badge = document.getElementById('badge-' + c.id);
+  if (!badge) return;
+  const MAP = {
+    sent:    ['badge-sent',    '✓ Enviado'],
+    failed:  ['badge-failed',  '✗ Error'],
+    skipped: ['badge-skipped', '↷ Saltado'],
+  };
+  const [cls, lbl] = MAP[result] || ['badge-queued', 'En cola'];
+  badge.className = 'badge ' + cls;
+  badge.textContent = lbl;
+}
+
+// ── Message editor ────────────────────────────────────────────────────────────
+function openEditor(id) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  editingId = id;
+  const initials = (c.name || '?').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+  document.getElementById('edAvatar').textContent = initials;
+  document.getElementById('edName').textContent   = c.name || '—';
+  document.getElementById('edMeta').textContent   = (c.title || '') + ' · ' + (c.company || '');
+  document.getElementById('edTextarea').value     = c.message || '';
+  onMsgInput();
+  document.getElementById('editorOverlay').classList.add('open');
+}
+
+document.getElementById('editorOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeEditor();
+});
+
+function closeEditor() { document.getElementById('editorOverlay').classList.remove('open'); }
+
+function onMsgInput() {
+  const len = document.getElementById('edTextarea').value.length;
+  const cc  = document.getElementById('charCount');
+  cc.textContent = len + ' / 300';
+  cc.className = 'char-count' + (len > 280 ? ' warn' : '') + (len > 300 ? ' over' : '');
+}
+
+function saveMessage() {
+  const msg = document.getElementById('edTextarea').value.trim().substring(0, 300);
+  const c = contacts.find(x => x.id === editingId);
+  if (c) {
+    c.message = msg;
+    const el = document.getElementById('msg-' + editingId);
+    if (el) el.textContent = msg;
+    send({ type: 'update_message', id: editingId, message: msg });
+    log('✏️ Mensaje editado — ' + (c.name || ''), 'info');
+  }
+  closeEditor();
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+function startSearch() {
+  contacts = [];
+  sentCount = 0;
+  document.getElementById('contactsTbody').textContent = '';
+  document.getElementById('contactsTable').style.display   = 'none';
+  document.getElementById('emptyState').style.display      = 'flex';
+  document.getElementById('statContactos').textContent     = '0';
+  document.getElementById('statEnviados').textContent      = '0';
+  send({ type: 'search_linkedin' });
+}
+
+function startSend() {
+  const limit = parseInt(document.getElementById('limitSelect').value, 10);
+  send({ type: 'start_send', contacts, limit });
+}
+
+function stopAll() { send({ type: 'stop' }); }
+
+// ── Stepper ───────────────────────────────────────────────────────────────────
+function setStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const si = document.getElementById('si' + i);
+    const sc = document.getElementById('sc' + i);
+    si.className = 'step-item' + (i === n ? ' active' : i < n ? ' done' : '');
+    sc.className = 'step-circle' + (i === n ? ' active' : i < n ? ' done' : '');
+    sc.textContent = i < n ? '✓' : String(i);
+    if (i < 4) document.getElementById('sl' + i).className = 'step-line' + (i < n ? ' done' : '');
+  }
+}
+
+// ── Log ───────────────────────────────────────────────────────────────────────
+function log(msg, type) {
+  type = type || 'info';
+  const panel = document.getElementById('logPanel');
+  const ts    = new Date().toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const time = document.createElement('span');
+  time.className = 'log-time';
+  time.textContent = ts;
+  const text = document.createElement('span');
+  text.className = 'log-' + type;
+  text.textContent = msg;
+  entry.appendChild(time);
+  entry.appendChild(text);
+  panel.appendChild(entry);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+// ── Email Composer ────────────────────────────────────────────────────────────
+let emailTpl = 'no_conn';
+
+function _buildEmailBody(name, company, tpl) {
+  const saludo = tpl === 'conn'
+    ? `Hola ${name},`
+    : `Hola ${name},`;
+
+  return `${saludo}
+
+Espero estés muy bien.
+
+Te comparto información rápida sobre cómo en Klik estamos ayudando empresas a optimizar su consumo energético y reducir costos operativos mediante visualización inteligente y tarifas competitivas.
+
+📲 Video Klik — haz clic aquí para verlo
+
+Caso real:
+
+• Andrés tiene un negocio de rosas que consumía aproximadamente $30.000.000 COP/mes en energía.
+• Con Klik, hoy logra un ahorro cercano al 10% mensual.
+• Gracias a:
+
+   * Visualización en tiempo real del consumo energético.
+   * Identificación de picos de consumo.
+   * Tarifas más competitivas.
+
+Creo que puede haber una conversación interesante para explorar oportunidades similares en ${company}.
+
+Quedo atento.
+
+Un saludo,
+Juan José Trujillo
+Klik ⚡`;
+}
+
+function openEmailComposer() {
+  const sel = document.getElementById('emailContactSel');
+  while (sel.options.length > 1) sel.remove(1);
+  contacts.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = (c.name || '—') + ' · ' + (c.company || '—');
+    sel.appendChild(opt);
+  });
+  document.getElementById('emailEditCheck').checked = false;
+  document.getElementById('emailBody').readOnly = true;
+  regenEmail();
+  document.getElementById('emailOverlay').classList.add('open');
+}
+
+function closeEmailComposer() {
+  document.getElementById('emailOverlay').classList.remove('open');
+}
+
+function onEmailContactSelected() {
+  const id = document.getElementById('emailContactSel').value;
+  if (!id) {
+    document.getElementById('emailFirstName').value = '';
+    document.getElementById('emailCompany').value   = '';
+  } else {
+    const c = contacts.find(x => x.id === id);
+    if (c) {
+      document.getElementById('emailFirstName').value = (c.name || '').split(' ')[0];
+      document.getElementById('emailCompany').value   = c.company || '';
+    }
+  }
+  regenEmail();
+}
+
+function setEmailTpl(tpl) {
+  emailTpl = tpl;
+  document.getElementById('tplBtnNo').className  = 'tpl-btn' + (tpl === 'no_conn' ? ' active' : '');
+  document.getElementById('tplBtnYes').className = 'tpl-btn' + (tpl === 'conn'    ? ' active' : '');
+  const subj = document.getElementById('emailSubject');
+  subj.value = tpl === 'conn'
+    ? 'Seguimiento de nuestra conversación | Klik ⚡'
+    : 'Optimización energética | Klik ⚡';
+  regenEmail();
+}
+
+function regenEmail() {
+  if (document.getElementById('emailEditCheck').checked) return;
+  const name    = document.getElementById('emailFirstName').value.trim() || 'Nombre';
+  const company = document.getElementById('emailCompany').value.trim()   || 'su empresa';
+  document.getElementById('emailBody').value = _buildEmailBody(name, company, emailTpl);
+}
+
+function toggleEmailEditable() {
+  const editable = document.getElementById('emailEditCheck').checked;
+  document.getElementById('emailBody').readOnly = !editable;
+  if (!editable) regenEmail();
+  else document.getElementById('emailBody').focus();
+}
+
+function _showCopyToast() {
+  const el = document.getElementById('copyToast');
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function copyEmailSubject() {
+  navigator.clipboard.writeText(document.getElementById('emailSubject').value).then(_showCopyToast);
+}
+
+function copyEmailBody() {
+  navigator.clipboard.writeText(document.getElementById('emailBody').value).then(_showCopyToast);
+}
+
+function copyEmailAll() {
+  const subj = document.getElementById('emailSubject').value;
+  const body = document.getElementById('emailBody').value;
+  navigator.clipboard.writeText('Asunto: ' + subj + '\n\n' + body).then(_showCopyToast);
+}
+
+document.getElementById('emailOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeEmailComposer();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+log('Sistema listo. Carga tu CSV para empezar.', 'info');
+connect();
+</script>
+</body>
+</html>

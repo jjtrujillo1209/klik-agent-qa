@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead GenAI Orchestrator · Klik Energy</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #263550;
+    --border: #334155;
+    --blue: #3b82f6;
+    --blue-dim: #1d4ed8;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --accent: #4472C4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #1F4E78 0%, #2563eb 100%);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { font-size: 26px; }
+  .header-title { font-size: 18px; font-weight: 700; }
+  .header-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+  .status-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--red); margin-right: 6px;
+    transition: background 0.3s;
+  }
+  .status-dot.connected { background: var(--green); animation: pulse 2s infinite; }
+  .status-label { font-size: 12px; color: rgba(255,255,255,0.8); display: flex; align-items: center; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── Main Layout ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* ── Pipeline Panel (izquierda) ── */
+  .pipeline-panel {
+    width: 340px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .pipeline-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .pipeline-steps {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .step-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .step-card.running::before { background: var(--blue); }
+  .step-card.completed::before { background: var(--green); }
+  .step-card.error::before { background: var(--red); }
+  .step-card[id="step-6"].completed::before { background: #a78bfa; }
+  .step-card[id="step-6"].running::before { background: #7c3aed; }
+
+  .step-card.running {
+    border-color: rgba(59,130,246,0.4);
+    background: rgba(59,130,246,0.08);
+  }
+  .step-card.completed {
+    border-color: rgba(16,185,129,0.3);
+    background: rgba(16,185,129,0.05);
+  }
+  .step-card.error {
+    border-color: rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.05);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .step-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .step-card.running .step-icon-wrap {
+    background: var(--blue);
+    animation: step-pulse 1.5s infinite;
+  }
+  .step-card.completed .step-icon-wrap {
+    background: var(--green);
+  }
+  .step-card.error .step-icon-wrap {
+    background: var(--red);
+  }
+
+  @keyframes step-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(59,130,246,0); }
+  }
+
+  .step-check {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 16px; height: 16px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    display: none;
+    animation: pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .step-card.completed .step-check { display: flex; }
+
+  @keyframes pop-in {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .step-num { font-size: 11px; font-weight: 700; color: var(--text-dim); }
+  .step-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .step-desc { font-size: 11px; color: var(--text-dim); margin-left: 46px; }
+  .step-msg { font-size: 11px; color: var(--text-dim); margin-left: 46px; margin-top: 4px; font-style: italic; }
+
+  .step-progress-bar {
+    margin: 8px 0 0 46px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  .step-card.running .step-progress-bar { display: block; }
+  .step-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.5s ease;
+    animation: shimmer 1.5s infinite;
+    background-size: 200% 100%;
+    background-image: linear-gradient(90deg, var(--blue) 25%, #60a5fa 50%, var(--blue) 75%);
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Stats ── */
+  .stats-panel {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--blue); }
+  .stat-label { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+  /* ── Chat Panel (derecha) ── */
+  .chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+
+  .chat-messages::-webkit-scrollbar { width: 6px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .message {
+    display: flex;
+    gap: 12px;
+    animation: slide-up 0.3s ease-out;
+    max-width: 780px;
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user { flex-direction: row-reverse; align-self: flex-end; }
+
+  .msg-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .message.agent .msg-avatar { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+  .message.user .msg-avatar { background: linear-gradient(135deg, #374151, #6b7280); }
+
+  .msg-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: calc(100% - 60px);
+  }
+  .message.user .msg-bubble {
+    background: var(--blue-dim);
+    border-color: var(--blue);
+  }
+  .msg-time {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  /* Log messages */
+  .msg-log {
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 4px 16px;
+    border-left: 2px solid var(--border);
+    margin-left: 48px;
+    font-family: monospace;
+  }
+  .msg-log.warn { border-color: var(--orange); color: #fbbf24; }
+  .msg-log.error { border-color: var(--red); color: #f87171; }
+
+  /* Data cards dentro de mensajes */
+  .data-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  .data-card .company-row {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex; justify-content: space-between;
+  }
+  .data-card .company-row:last-child { border-bottom: none; }
+  .badge-vigente { color: var(--green); font-weight: 700; }
+  .badge-pending { color: var(--orange); }
+
+  /* ── Sugerencias ── */
+  .suggestions {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 12px;
+    flex-wrap: wrap;
+  }
+  .suggestion-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .suggestion-chip:hover {
+    border-color: var(--blue);
+    color: var(--text);
+    background: rgba(59,130,246,0.1);
+  }
+
+  /* ── Input Area ── */
+  .chat-input-area {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .input-wrap {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2px;
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within { border-color: var(--blue); }
+
+  #chatInput {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    padding: 10px 14px;
+    resize: none;
+    max-height: 120px;
+    min-height: 44px;
+    font-family: inherit;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-send {
+    background: var(--blue);
+    color: white;
+    min-width: 80px;
+  }
+  .btn-send:hover { background: #2563eb; transform: translateY(-1px); }
+  .btn-send:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+  .btn-stop {
+    background: var(--red);
+    color: white;
+    padding: 10px 16px;
+  }
+  .btn-stop:hover { background: #dc2626; }
+  .btn-reset {
+    background: var(--surface2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  .btn-reset:hover { color: var(--text); border-color: var(--text-dim); }
+
+  /* Download outputs */
+  .outputs-panel {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .outputs-panel.active { display: block; }
+  .outputs-title { font-size: 11px; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; }
+  .output-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11px;
+    text-decoration: none;
+    color: var(--text);
+    margin-right: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+  }
+  .output-file:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* Outreach sender panel */
+  .outreach-panel {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: rgba(124,58,237,0.06);
+    display: none;
+  }
+  .outreach-panel.active { display: block; }
+  .outreach-title {
+    font-size: 11px; font-weight: 700; color: #a78bfa;
+    margin-bottom: 10px; letter-spacing: 0.5px;
+  }
+  .outreach-controls {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .outreach-select {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 5px 8px;
+    font-size: 12px; cursor: pointer;
+  }
+  .btn-outreach-send {
+    background: linear-gradient(135deg,#7c3aed,#a78bfa);
+    color: white; border: none; border-radius: 8px;
+    padding: 7px 14px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-outreach-send:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-outreach-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-outreach-stop {
+    background: var(--red); color: white; border: none;
+    border-radius: 8px; padding: 7px 12px; font-size: 12px;
+    font-weight: 600; cursor: pointer; display: none;
+  }
+  .outreach-progress-wrap {
+    display: none; margin-top: 8px;
+  }
+  .outreach-progress-wrap.active { display: block; }
+  .outreach-progress-bar {
+    height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
+    margin-bottom: 5px;
+  }
+  .outreach-progress-fill {
+    height: 100%; background: linear-gradient(90deg,#7c3aed,#a78bfa);
+    border-radius: 3px; width: 0%; transition: width 0.5s ease;
+  }
+  .outreach-progress-label {
+    font-size: 11px; color: var(--text-dim);
+  }
+
+  /* Spinner */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* LinkedIn Auth Banner */
+  .auth-banner {
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #fbbf24;
+    margin: 12px 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .auth-banner a {
+    color: var(--blue);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .pipeline-panel { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-left">
+    <span class="header-logo">⚡</span>
+    <div>
+      <div class="header-title">Lead GenAI Orchestrator</div>
+      <div class="header-sub">Klik Energy · Mercado No Regulado · Claude AI</div>
+    </div>
+  </div>
+  <div class="status-label">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Conectando...</span>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Pipeline Panel -->
+  <div class="pipeline-panel">
+    <div class="pipeline-header">⚡ Pipeline · 6 Pasos</div>
+
+    <div class="pipeline-steps" id="pipelineSteps">
+      <!-- Los pasos se generan dinámicamente -->
+      <div id="stepsContainer"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-panel" style="grid-template-columns:1fr 1fr">
+      <div class="stat-box">
+        <div class="stat-value" id="statCompanies">0</div>
+        <div class="stat-label">Empresas</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statContacts" style="color:var(--green)">0</div>
+        <div class="stat-label">Contactos</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statMessages" style="color:#a78bfa">0</div>
+        <div class="stat-label">Mensajes</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statStatus" style="color:var(--orange); font-size:14px">—</div>
+        <div class="stat-label">Estado</div>
+      </div>
+    </div>
+
+    <!-- Outputs -->
+    <div class="outputs-panel" id="outputsPanel">
+      <div class="outputs-title">📁 ARCHIVOS GENERADOS</div>
+      <div id="outputFiles"></div>
+    </div>
+
+    <!-- Outreach Sender -->
+    <div class="outreach-panel" id="outreachPanel">
+      <div class="outreach-title">💬 ENVÍO AUTOMÁTICO LINKEDIN</div>
+      <div class="outreach-controls">
+        <select class="outreach-select" id="outreachStage">
+          <option value="connection">Connection Requests</option>
+          <option value="messages">Mensajes directos</option>
+        </select>
+        <select class="outreach-select" id="outreachLimit">
+          <option value="5">5 / día</option>
+          <option value="10">10 / día</option>
+          <option value="15" selected>15 / día ✓</option>
+          <option value="20">20 / día (máx)</option>
+        </select>
+        <button class="btn-outreach-send" id="btnOutreachSend" onclick="startOutreach()">
+          🚀 Iniciar envío
+        </button>
+        <button class="btn-outreach-stop" id="btnOutreachStop" onclick="stopOutreach()">
+          ⏹ Detener
+        </button>
+      </div>
+      <div class="outreach-progress-wrap" id="outreachProgressWrap">
+        <div class="outreach-progress-bar">
+          <div class="outreach-progress-fill" id="outreachProgressFill"></div>
+        </div>
+        <div class="outreach-progress-label" id="outreachProgressLabel">Preparando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Panel -->
+  <div class="chat-panel">
+    <!-- Auth Banner -->
+    <div class="auth-banner" id="authBanner" style="display:none">
+      ⚠️ LinkedIn no autenticado — Las búsquedas usarán modo público (Google).
+      <a onclick="sendAuth()">Autenticar LinkedIn →</a>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chatMessages">
+      <div class="message agent">
+        <div class="msg-avatar">⚡</div>
+        <div>
+          <div class="msg-bubble">
+            👋 Hola Juan, soy tu <strong>Agente Orquestador de Leads</strong>.<br><br>
+            Estoy listo para buscar empresas del mercado no regulado con NIT verificado en RUES y encontrar decision makers en LinkedIn.<br><br>
+            <strong>¿Cómo quieres empezar?</strong> Dime el sector, ciudad o tipo de empresa que buscas, o usa uno de los comandos sugeridos abajo.
+          </div>
+          <div class="msg-time">Ahora</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sugerencias -->
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">⚡ Pipeline completo — sector industrial Medellín</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">🏭 Buscar 20 empresas manufactureras en Bogotá</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">💬 Generar outreach LinkedIn para los contactos actuales</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">👤 Buscar directores de planta en LinkedIn</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">🪪 Validar NIT 860002395-0 en RUES</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">📊 Exportar resultados a Excel y HubSpot</div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+      <div class="input-wrap">
+        <textarea
+          id="chatInput"
+          placeholder="Escríbeme qué empresas buscas, sector, ciudad... o pide el pipeline completo"
+          rows="1"
+        ></textarea>
+      </div>
+      <button class="btn btn-stop" id="stopBtn" onclick="sendStop()" style="display:none" title="Detener pipeline">⏹</button>
+      <button class="btn btn-reset" onclick="sendReset()" title="Nueva sesión">↺</button>
+      <button class="btn btn-send" id="sendBtn" onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Configuración ──────────────────────────────────────────────────────────
+const WS_HOST = window.location.hostname || 'localhost';
+const WS_PORT = 8765;
+const SESSION_ID = 'session_' + Math.random().toString(36).substr(2, 9);
+
+let ws = null;
+let isRunning = false;
+
+// Estado del pipeline
+const pipelineState = {
+  steps: [],
+  companies: 0,
+  contacts: 0,
+};
+
+// ── Pipeline Steps UI ──────────────────────────────────────────────────────
+const DEFAULT_STEPS = [
+  { id: 1, name: "Descubrimiento de Empresas", icon: "🏭",
+    desc: "RUES · Google · Páginas Amarillas · Mercado No Regulado" },
+  { id: 2, name: "Validación NIT · RUES", icon: "🪪",
+    desc: "Registro Único Empresarial — vigencia oficial" },
+  { id: 3, name: "Decision Makers · LinkedIn", icon: "👤",
+    desc: "Dir. Mantenimiento · Dir. Planta · Dir. General" },
+  { id: 4, name: "Enriquecimiento de Contactos", icon: "📧",
+    desc: "Emails y teléfonos verificados" },
+  { id: 5, name: "Exportación · Excel + CSV", icon: "📊",
+    desc: "Plantilla HubSpot + Excel con links clickeables" },
+  { id: 6, name: "Outreach · LinkedIn", icon: "💬",
+    desc: "Secuencias personalizadas por cargo · Cola lista para enviar" },
+];
+
+function renderSteps(steps = DEFAULT_STEPS) {
+  const container = document.getElementById('stepsContainer');
+  container.innerHTML = '';
+  steps.forEach(step => {
+    container.innerHTML += `
+      <div class="step-card" id="step-${step.id}">
+        <div class="step-header">
+          <div class="step-icon-wrap">
+            <span class="step-emoji">${step.icon}</span>
+            <span class="step-check">✓</span>
+          </div>
+          <div style="flex:1">
+            <div class="step-num">PASO ${step.id}</div>
+            <div class="step-name">${step.name}</div>
+          </div>
+        </div>
+        <div class="step-desc">${step.desc || ''}</div>
+        <div class="step-msg" id="step-msg-${step.id}">Esperando...</div>
+        <div class="step-progress-bar">
+          <div class="step-progress-fill" id="step-prog-${step.id}"></div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function updateStep(stepId, status, message, data) {
+  const card = document.getElementById(`step-${stepId}`);
+  const msgEl = document.getElementById(`step-msg-${stepId}`);
+  if (!card) return;
+
+  // Reset clases
+  card.classList.remove('running', 'completed', 'error');
+  if (status === 'running') card.classList.add('running');
+  if (status === 'completed') card.classList.add('completed');
+  if (status === 'error') card.classList.add('error');
+
+  if (msgEl && message) msgEl.textContent = message;
+
+  // Datos extra
+  if (data && status === 'completed') {
+    if (data.count !== undefined) {
+      document.getElementById('statCompanies').textContent = data.count;
+    }
+    if (data.with_email !== undefined || data.vigentes !== undefined) {
+      // actualizar stats
+    }
+  }
+}
+
+function updateProgress(stepId, current, total, item) {
+  const bar = document.getElementById(`step-prog-${stepId}`);
+  if (bar && total > 0) {
+    bar.style.width = `${Math.round((current / total) * 100)}%`;
+  }
+  const msgEl = document.getElementById(`step-msg-${stepId}`);
+  if (msgEl && item) {
+    msgEl.textContent = `[${current}/${total}] ${item}`;
+  }
+}
+
+// ── WebSocket ──────────────────────────────────────────────────────────────
+function connect() {
+  try {
+    ws = new WebSocket(`ws://${WS_HOST}:${WS_PORT}/ws/${SESSION_ID}`);
+
+    ws.onopen = () => {
+      setConnected(true);
+    };
+
+    ws.onclose = () => {
+      setConnected(false);
+      setTimeout(connect, 3000);
+    };
+
+    ws.onerror = () => {
+      setConnected(false);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        handleMessage(data);
+      } catch (e) {
+        console.error('WS parse error', e);
+      }
+    };
+  } catch(e) {
+    setConnected(false);
+    setTimeout(connect, 3000);
+  }
+}
+
+function setConnected(connected) {
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('statusText');
+  if (connected) {
+    dot.classList.add('connected');
+    label.textContent = 'Conectado · ' + SESSION_ID.substring(0,12);
+  } else {
+    dot.classList.remove('connected');
+    label.textContent = 'Reconectando...';
+  }
+}
+
+// ── Message Handler ────────────────────────────────────────────────────────
+function handleMessage(data) {
+  const type = data.type;
+
+  if (type === 'connected') {
+    appendAgentMessage(data.message);
+  }
+
+  else if (type === 'user_message') {
+    // ya se mostró localmente
+  }
+
+  else if (type === 'agent_reply') {
+    appendAgentMessage(data.message, data.data);
+    setRunning(false);
+  }
+
+  else if (type === 'agent_log') {
+    appendLog(data.message, data.level, data.agent);
+  }
+
+  else if (type === 'step_update') {
+    updateStep(data.step_id, data.status, data.message, data.data);
+    document.getElementById('statStatus').textContent =
+      data.status === 'running' ? 'Corriendo' :
+      data.status === 'completed' ? 'Listo' : '—';
+  }
+
+  else if (type === 'progress') {
+    updateProgress(data.step_id, data.current, data.total, data.item);
+  }
+
+  else if (type === 'pipeline_start') {
+    setRunning(true);
+    if (data.steps) renderSteps(data.steps);
+    document.getElementById('statStatus').textContent = 'En curso';
+    appendAgentMessage('🚀 Pipeline iniciado. Siguiendo cada paso en tiempo real...');
+  }
+
+  else if (type === 'outreach_sending_start') {
+    setOutreachSending(true);
+    document.getElementById('outreachProgressWrap').classList.add('active');
+    document.getElementById('outreachProgressLabel').textContent =
+      `Iniciando — etapa: ${data.stage} · límite: ${data.limit}/día`;
+    appendAgentMessage(data.message);
+  }
+
+  else if (type === 'outreach_progress') {
+    const pct = data.total > 0 ? Math.round((data.sent / data.total) * 100) : 0;
+    document.getElementById('outreachProgressFill').style.width = pct + '%';
+    const resultIcon = data.result === 'sent' ? '✅' : data.result === 'skipped' ? '⏭️' : '❌';
+    document.getElementById('outreachProgressLabel').textContent =
+      `${resultIcon} [${data.sent}/${data.total}] ${data.current_name}`;
+    document.getElementById('statMessages').textContent = data.sent;
+  }
+
+  else if (type === 'outreach_complete') {
+    setOutreachSending(false);
+    const s = data.summary;
+    document.getElementById('outreachProgressFill').style.width = '100%';
+    document.getElementById('outreachProgressLabel').textContent =
+      `Completado: ${s.sent} enviados · ${s.skipped} saltados · ${s.failed} fallidos`;
+    appendAgentMessage(
+      `✅ **Envío completado:**\n` +
+      `- ${s.sent} mensajes enviados\n` +
+      `- ${s.skipped} saltados (ya conectados o pendientes)\n` +
+      `- ${s.failed} fallidos\n\n` +
+      `Los enviados quedan registrados en la cola. Mañana puedes continuar con los siguientes.`
+    );
+  }
+
+  else if (type === 'pipeline_complete') {
+    setRunning(false);
+    document.getElementById('statCompanies').textContent = data.companies || 0;
+    document.getElementById('statContacts').textContent = data.contacts || 0;
+    document.getElementById('statMessages').textContent = data.messages || 0;
+    document.getElementById('statStatus').textContent = '✅ Listo';
+
+    if (data.exports) {
+      showOutputFiles(data.exports);
+      // Mostrar panel de envío automático si hay cola
+      if (data.exports.queue_path || data.exports.outreach_excel) {
+        document.getElementById('outreachPanel').classList.add('active');
+      }
+    }
+  }
+
+  else if (type === 'system') {
+    appendSystemMessage(data.message);
+    setRunning(false);
+  }
+
+  else if (type === 'reset') {
+    clearChat();
+    renderSteps();
+    document.getElementById('statCompanies').textContent = '0';
+    document.getElementById('statContacts').textContent = '0';
+    document.getElementById('statStatus').textContent = '—';
+    appendAgentMessage(data.message);
+  }
+
+  else if (type === 'error') {
+    appendSystemMessage('❌ ' + data.message, true);
+    setRunning(false);
+  }
+}
+
+// ── UI Helpers ─────────────────────────────────────────────────────────────
+function setRunning(running) {
+  isRunning = running;
+  const sendBtn = document.getElementById('sendBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const input = document.getElementById('chatInput');
+
+  sendBtn.disabled = running;
+  sendBtn.innerHTML = running
+    ? '<span class="spinner"></span>Corriendo'
+    : 'Enviar';
+  stopBtn.style.display = running ? 'block' : 'none';
+  input.disabled = running;
+}
+
+function getTime() {
+  return new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+}
+
+function appendAgentMessage(text, data) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message agent';
+
+  // Formatear texto (bold con **)
+  const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+  let dataHtml = '';
+  if (data && data.sample && Array.isArray(data.sample)) {
+    dataHtml = '<div class="data-card">';
+    data.sample.forEach(company => {
+      const name = company.rues_name || company.name || 'N/A';
+      const status = company.rues_status || 'PENDIENTE';
+      const statusClass = status === 'VIGENTE' ? 'badge-vigente' : 'badge-pending';
+      dataHtml += `<div class="company-row">
+        <span>${name}</span>
+        <span class="${statusClass}">${status}</span>
+      </div>`;
+    });
+    dataHtml += '</div>';
+  }
+
+  div.innerHTML = `
+    <div class="msg-avatar">⚡</div>
+    <div>
+      <div class="msg-bubble">${formatted}${dataHtml}</div>
+      <div class="msg-time">${getTime()}</div>
+    </div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendUserMessage(text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message user';
+  div.innerHTML = `
+    <div class="msg-avatar">JT</div>
+    <div>
+      <div class="msg-bubble">${text}</div>
+      <div class="msg-time">${getTime()}</div>
+    </div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendLog(text, level = 'info', agent = '') {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg-log ${level}`;
+  const agentLabel = agent ? `[${agent}] ` : '';
+  div.textContent = `${agentLabel}${text}`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendSystemMessage(text, isError = false) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message agent';
+  div.innerHTML = `
+    <div class="msg-avatar" style="background:${isError ? 'var(--red)' : 'var(--surface2)'}">ℹ</div>
+    <div>
+      <div class="msg-bubble" style="border-color:${isError ? 'var(--red)' : 'var(--border)'}">${text}</div>
+      <div class="msg-time">${getTime()}</div>
+    </div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function clearChat() {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+}
+
+function showOutputFiles(exports) {
+  const panel = document.getElementById('outputsPanel');
+  const filesDiv = document.getElementById('outputFiles');
+  panel.classList.add('active');
+
+  const baseUrl = `http://${WS_HOST}:${WS_PORT}/outputs`;
+  let html = '';
+
+  if (exports.excel_file)
+    html += `<a class="output-file" href="${baseUrl}/${exports.excel_file}" target="_blank">📊 ${exports.excel_file}</a>`;
+  if (exports.csv_file)
+    html += `<a class="output-file" href="${baseUrl}/${exports.csv_file}" target="_blank">📋 ${exports.csv_file}</a>`;
+  if (exports.outreach_excel)
+    html += `<a class="output-file" href="${baseUrl}/${exports.outreach_excel}" target="_blank" style="border-color:#a78bfa;color:#a78bfa">💬 ${exports.outreach_excel}</a>`;
+  if (exports.outreach_csv)
+    html += `<a class="output-file" href="${baseUrl}/${exports.outreach_csv}" target="_blank" style="border-color:#a78bfa;color:#a78bfa">📨 ${exports.outreach_csv}</a>`;
+
+  filesDiv.innerHTML = html;
+}
+
+// ── Send Functions ─────────────────────────────────────────────────────────
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+  appendUserMessage(text);
+  ws.send(JSON.stringify({ type: 'chat', message: text }));
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Ocultar sugerencias
+  document.getElementById('suggestions').style.display = 'none';
+}
+
+function sendStop() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'stop' }));
+  }
+  setRunning(false);
+}
+
+function sendReset() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'reset' }));
+  }
+  renderSteps();
+  document.getElementById('suggestions').style.display = 'flex';
+  document.getElementById('outputsPanel').classList.remove('active');
+}
+
+function sendAuth() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'chat', message: 'Autenticar LinkedIn' }));
+  }
+}
+
+function startOutreach() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  const stage = document.getElementById('outreachStage').value;
+  const limit = parseInt(document.getElementById('outreachLimit').value);
+  ws.send(JSON.stringify({ type: 'send_outreach', stage, limit }));
+}
+
+function stopOutreach() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({ type: 'stop_outreach' }));
+  setOutreachSending(false);
+}
+
+function setOutreachSending(sending) {
+  document.getElementById('btnOutreachSend').disabled = sending;
+  document.getElementById('btnOutreachStop').style.display = sending ? 'block' : 'none';
+  document.getElementById('btnOutreachSend').textContent = sending
+    ? '⏳ Enviando...' : '🚀 Iniciar envío';
+}
+
+function sendSuggestion(el) {
+  const text = el.textContent.trim();
+  const input = document.getElementById('chatInput');
+  input.value = text;
+  sendMessage();
+}
+
+// ── Input auto-resize ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderSteps();
+  connect();
+
+  const input = document.getElementById('chatInput');
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+});
+</script>
+</body>
+</html>

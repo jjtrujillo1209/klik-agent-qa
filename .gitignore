@@ -1,0 +1,43 @@
+# Secrets — nunca commitear
+.env
+*.env.local
+
+# Cookies LinkedIn con sesión activa
+linkedin_cookies.json
+*.cookies
+
+# Datos confidenciales y outputs
+data/
+docs/NDA_*
+docs/*.pdf
+docs/*.pptx
+docs/*.xlsx
+docs/*.docx
+docs/AUDITORÍA_FINAL.txt
+docs/Click_Energy_*
+docs/generate_nda_pi_pdf.py
+
+# Outputs generados
+outputs/
+
+# Cache de archivos procesados
+checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Control de dependencias instaladas
+.deps_installed
+
+# Logs y PIDs
+server.log
+server.pid
+*.log
+
+# macOS
+.DS_Store

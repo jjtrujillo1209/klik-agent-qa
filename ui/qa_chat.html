@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLIK Agent QA · Demo</title>
+<style>
+  :root {
+    --bg:        #0f172a;
+    --surface:   #1e293b;
+    --surface2:  #263550;
+    --border:    #334155;
+    --blue:      #3b82f6;
+    --blue-dim:  #1d4ed8;
+    --green:     #10b981;
+    --wa-green:  #25d366;
+    --wa-bubble: #1a3a2a;
+    --orange:    #f59e0b;
+    --red:       #ef4444;
+    --text:      #f1f5f9;
+    --text-dim:  #94a3b8;
+    --text-xs:   #64748b;
+    --radius:    12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+  .logo span { color: var(--text-dim); font-weight: 400; font-size: 12px; margin-left: 6px; }
+
+  .mode-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    padding: 3px;
+    border-radius: 8px;
+  }
+  .mode-tab {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mode-tab.active {
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .mode-tab.active.wa  { color: var(--wa-green); }
+  .mode-tab.active.tel { color: var(--blue); }
+
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text-dim);
+  }
+  .btn-danger {
+    background: #3f1515;
+    color: var(--red);
+  }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  /* ── LAYOUT ── */
+  main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── CHAT PANEL ── */
+  .chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .mode-whatsapp .chat-avatar { background: var(--wa-green); }
+  .mode-llamada  .chat-avatar { background: var(--blue); }
+
+  .chat-header-info { flex: 1; }
+  .chat-header-info strong { font-size: 14px; display: block; }
+  .chat-header-info small { font-size: 11px; color: var(--text-dim); }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-xs);
+    display: inline-block;
+    margin-right: 4px;
+  }
+  .status-dot.online { background: var(--green); }
+  .status-dot.incall { background: var(--blue); animation: pulse 1.5s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+
+  /* ── MESSAGES ── */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 18px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+  }
+
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 72%;
+  }
+  .msg.user   { align-self: flex-end; align-items: flex-end; }
+  .msg.agent  { align-self: flex-start; align-items: flex-start; }
+
+  .msg-role {
+    font-size: 10px;
+    color: var(--text-xs);
+    margin-bottom: 3px;
+    padding: 0 4px;
+  }
+
+  .bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg.user .bubble {
+    background: var(--surface2);
+    color: var(--text);
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg.agent .bubble {
+    border-bottom-left-radius: 4px;
+  }
+  .mode-whatsapp .msg.agent .bubble {
+    background: var(--wa-bubble);
+    color: var(--text);
+    border-left: 2px solid var(--wa-green);
+  }
+  .mode-llamada .msg.agent .bubble {
+    background: #172033;
+    color: var(--text);
+    border-left: 2px solid var(--blue);
+  }
+
+  .msg-time {
+    font-size: 10px;
+    color: var(--text-xs);
+    margin-top: 3px;
+    padding: 0 4px;
+  }
+
+  /* Typing indicator */
+  .typing {
+    display: none;
+    align-self: flex-start;
+  }
+  .typing.visible { display: flex; }
+  .typing-bubble {
+    background: var(--surface2);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    background: var(--text-dim);
+    border-radius: 50%;
+    animation: bounce .9s infinite;
+  }
+  .dot:nth-child(2) { animation-delay: .15s; }
+  .dot:nth-child(3) { animation-delay: .30s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+  }
+
+  /* Empty state */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--text-xs);
+    text-align: center;
+    padding: 20px;
+  }
+  .empty-state .icon { font-size: 40px; }
+  .empty-state p { font-size: 13px; max-width: 220px; }
+
+  /* ── INPUT ── */
+  .input-area {
+    display: flex;
+    gap: 10px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    align-items: flex-end;
+  }
+
+  textarea {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 10px 14px;
+    resize: none;
+    outline: none;
+    min-height: 42px;
+    max-height: 120px;
+    line-height: 1.5;
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  textarea:focus { border-color: var(--blue); }
+  textarea::placeholder { color: var(--text-xs); }
+
+  #btn-send {
+    height: 42px;
+    padding: 0 20px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  #btn-send:hover { background: var(--blue-dim); }
+  #btn-send:disabled { opacity: .4; cursor: not-allowed; }
+
+  .mode-whatsapp #btn-send { background: var(--wa-green); }
+  .mode-whatsapp #btn-send:hover { background: #1da851; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: var(--surface);
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-xs);
+    margin-bottom: 12px;
+  }
+
+  /* CRM Fields */
+  .crm-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #1a2535;
+    gap: 8px;
+  }
+  .crm-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    width: 70px;
+  }
+  .crm-value {
+    font-size: 12px;
+    color: var(--text-xs);
+    text-align: right;
+    word-break: break-word;
+    flex: 1;
+    transition: color .3s;
+  }
+  .crm-value.filled {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--surface2);
+  }
+  .status-badge .dot { width: 6px; height: 6px; animation: none; }
+
+  .estado-por_calificar .dot { background: var(--text-xs); }
+  .estado-calificado     .dot { background: var(--blue); }
+  .estado-reunion_propuesta .dot { background: var(--orange); animation: pulse 1.5s infinite; }
+  .estado-reunion_agendada  .dot { background: var(--green); }
+  .estado-no_aplica         .dot { background: var(--red); }
+
+  /* Scenarios */
+  .scenario-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    line-height: 1.4;
+  }
+  .scenario-btn:hover {
+    border-color: var(--blue);
+    color: var(--text);
+  }
+  .scenario-btn .tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  .tag-in  { background: #1a3350; color: var(--blue); }
+  .tag-out { background: #2a1a3a; color: #a78bfa; }
+  .tag-pqr { background: #3a1a1a; color: var(--red); }
+  .tag-obj { background: #2a2a1a; color: var(--orange); }
+
+  /* Stats */
+  .stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .token-counter {
+    font-size: 11px;
+    color: var(--text-xs);
+  }
+  .token-counter b { color: var(--text-dim); }
+
+  .btn-export {
+    font-size: 11px;
+    padding: 5px 10px;
+    background: var(--surface2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-export:hover { border-color: var(--blue); color: var(--text); }
+
+  /* QA only section notice */
+  .qa-notice {
+    font-size: 10px;
+    color: var(--text-xs);
+    background: #1a2535;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .qa-notice b { color: var(--orange); }
+
+  /* Scrollbar for messages */
+  .messages { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ────────────────────────────────────────────── -->
+<header>
+  <div class="logo">KLIK <span>Agent QA</span></div>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active wa" data-mode="whatsapp" onclick="setMode('whatsapp')">
+      💬 WhatsApp
+    </button>
+    <button class="mode-tab tel" data-mode="llamada" onclick="setMode('llamada')">
+      📞 Llamada
+    </button>
+  </div>
+
+  <div class="header-right">
+    <button class="btn btn-ghost" onclick="exportConv()" title="Copiar conversación">📋 Exportar</button>
+    <button class="btn btn-danger" onclick="resetChat()">↺ Nuevo</button>
+  </div>
+</header>
+
+<!-- ── MAIN ──────────────────────────────────────────────── -->
+<main id="main" class="mode-whatsapp">
+
+  <!-- CHAT -->
+  <div class="chat-panel">
+
+    <div class="chat-header" id="chat-header">
+      <div class="chat-avatar" id="chat-avatar">💬</div>
+      <div class="chat-header-info">
+        <strong id="chat-title">Asesor KLIK · WhatsApp</strong>
+        <small><span class="status-dot online" id="status-dot"></span><span id="status-label">En línea</span></small>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="empty-state" id="empty-state">
+        <div class="icon">💬</div>
+        <p>Selecciona un escenario o escribe un mensaje para comenzar</p>
+      </div>
+      <div class="typing" id="typing">
+        <div class="typing-bubble">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <textarea
+        id="msg-input"
+        placeholder="Escribe como el prospecto..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button id="btn-send" onclick="sendMessage()">Enviar</button>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- CRM DATA -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Datos CRM</div>
+
+      <div class="crm-field"><span class="crm-label">Empresa</span>  <span class="crm-value" id="crm-empresa">—</span></div>
+      <div class="crm-field"><span class="crm-label">Ciudad</span>   <span class="crm-value" id="crm-ciudad">—</span></div>
+      <div class="crm-field"><span class="crm-label">Consumo</span>  <span class="crm-value" id="crm-consumo">—</span></div>
+      <div class="crm-field"><span class="crm-label">Contacto</span> <span class="crm-value" id="crm-nombre">—</span></div>
+      <div class="crm-field"><span class="crm-label">Cargo</span>    <span class="crm-value" id="crm-cargo">—</span></div>
+      <div class="crm-field"><span class="crm-label">Correo</span>   <span class="crm-value" id="crm-correo">—</span></div>
+      <div class="crm-field"><span class="crm-label">Interés</span>  <span class="crm-value" id="crm-interes">—</span></div>
+      <div class="crm-field"><span class="crm-label">Tipo</span>     <span class="crm-value" id="crm-tipo">—</span></div>
+
+      <div id="estado-badge" class="status-badge estado-por_calificar">
+        <span class="dot"></span>
+        <span id="estado-label">Por calificar</span>
+      </div>
+    </div>
+
+    <!-- SCENARIOS QA -->
+    <div class="sidebar-section" id="scenarios-panel">
+      <div class="sidebar-title">Escenarios QA</div>
+      <div class="qa-notice"><b>QA:</b> Cada botón reinicia el chat con ese escenario específico.</div>
+      <div id="scenario-buttons"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Estadísticas</div>
+      <div class="stats-row">
+        <span class="token-counter">Tokens: <b id="token-count">0</b></span>
+        <span class="token-counter">Mensajes: <b id="msg-count">0</b></span>
+      </div>
+      <div class="stats-row" style="margin-top:8px">
+        <span class="token-counter">Costo est.: <b id="cost-est">$0.000</b></span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────
+let mode = 'whatsapp';
+let history = [];
+let totalTokens = 0;
+let msgCount = 0;
+let isBusy = false;
+const API = 'http://localhost:8767';
+
+// ── SCENARIOS ──────────────────────────────────────────────
+const SCENARIOS = {
+  whatsapp: [
+    { tag: 'in',  label: 'Inbound curioso',         msg: 'Hola, vi algo de KLIK en internet y quiero saber más' },
+    { tag: 'in',  label: 'Solicitud comercial',      msg: 'Somos una empresa industrial y queremos explorar opciones de energía' },
+    { tag: 'in',  label: 'Pide info por escrito',    msg: 'Pueden mandarme información de lo que ofrecen por favor?' },
+    { tag: 'pqr', label: 'PQRS · Queja',             msg: 'Tengo un problema, me ofrecieron sus servicios hace 2 semanas y nadie me ha contactado' },
+    { tag: 'pqr', label: 'PQRS · Reclamo',           msg: 'Quiero hacer un reclamo formal, firmamos un acuerdo y no se cumplió' },
+    { tag: 'obj', label: 'Objeción: ya tenemos proveedor', msg: 'Ya tenemos proveedor de energía contratado, no creo que necesitemos algo más' },
+    { tag: 'obj', label: 'Objeción: no me interesa', msg: 'La verdad no creo que esto aplique para nosotros, gracias' },
+  ],
+  llamada: [
+    { tag: 'in',  label: 'Inbound (agente contesta)', trigger: '__START_INBOUND__' },
+    { tag: 'out', label: 'Outbound (agente llama)',    trigger: '__START_OUTBOUND__' },
+    { tag: 'obj', label: 'No tengo tiempo',            msg: 'Mira te escucho pero estoy muy ocupado en este momento' },
+    { tag: 'obj', label: 'No sé el consumo',           msg: 'Honestamente no tengo ese dato a la mano ahora mismo' },
+    { tag: 'obj', label: 'Ya tenemos proveedor',       msg: 'Nosotros ya tenemos proveedor de energía contratado' },
+    { tag: 'obj', label: 'Mándame info',               msg: 'Mejor mándame información por correo y yo la reviso' },
+    { tag: 'pqr', label: 'PQRS en llamada',            msg: 'Les llamo porque tengo un problema con el servicio que me ofrecieron' },
+  ],
+};
+
+const ESTADO_LABELS = {
+  por_calificar:    'Por calificar',
+  calificado:       'Calificado',
+  reunion_propuesta:'Reunión propuesta',
+  reunion_agendada: 'Reunión agendada',
+  no_aplica:        'No aplica',
+};
+
+const TAG_CLASS = { in: 'tag-in', out: 'tag-out', pqr: 'tag-pqr', obj: 'tag-obj' };
+const TAG_LABEL = { in: 'INBOUND', out: 'OUTBOUND', pqr: 'PQRS', obj: 'OBJECIÓN' };
+
+// ── MODE ───────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-mode="${m}"]`).classList.add('active');
+
+  const main = document.getElementById('main');
+  main.className = `mode-${m}`;
+
+  if (m === 'whatsapp') {
+    document.getElementById('chat-avatar').textContent = '💬';
+    document.getElementById('chat-title').textContent = 'Asesor KLIK · WhatsApp';
+    document.getElementById('status-label').textContent = 'En línea';
+    document.getElementById('status-dot').className = 'status-dot online';
+    document.getElementById('msg-input').placeholder = 'Escribe como el prospecto...';
+  } else {
+    document.getElementById('chat-avatar').textContent = '📞';
+    document.getElementById('chat-title').textContent = 'Asesor KLIK · Llamada';
+    document.getElementById('status-label').textContent = 'Listo';
+    document.getElementById('status-dot').className = 'status-dot';
+    document.getElementById('msg-input').placeholder = 'Habla como el prospecto...';
+  }
+
+  renderScenarios();
+  resetChat(true);
+}
+
+// ── SCENARIOS RENDER ───────────────────────────────────────
+function renderScenarios() {
+  const container = document.getElementById('scenario-buttons');
+  container.innerHTML = '';
+  SCENARIOS[mode].forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'scenario-btn';
+
+    const tag = document.createElement('span');
+    tag.className = `tag ${TAG_CLASS[s.tag]}`;
+    tag.textContent = TAG_LABEL[s.tag];
+
+    btn.appendChild(tag);
+    btn.appendChild(document.createTextNode(' ' + s.label));
+    btn.onclick = () => loadScenario(s);
+    container.appendChild(btn);
+  });
+}
+
+async function loadScenario(s) {
+  resetChat(true);
+  await new Promise(r => setTimeout(r, 80));
+
+  if (s.trigger) {
+    await sendMessage(s.trigger, true);
+  } else if (s.msg) {
+    document.getElementById('msg-input').value = s.msg;
+    await sendMessage();
+  }
+}
+
+// ── CHAT ───────────────────────────────────────────────────
+function resetChat(silent = false) {
+  history = [];
+  totalTokens = 0;
+  msgCount = 0;
+
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+
+  const emptyDiv = document.createElement('div');
+  emptyDiv.className = 'empty-state';
+  emptyDiv.id = 'empty-state';
+  const iconDiv = document.createElement('div');
+  iconDiv.className = 'icon';
+  iconDiv.textContent = mode === 'whatsapp' ? '💬' : '📞';
+  const emptyP = document.createElement('p');
+  emptyP.textContent = 'Selecciona un escenario o escribe un mensaje para comenzar';
+  emptyDiv.appendChild(iconDiv);
+  emptyDiv.appendChild(emptyP);
+
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'typing';
+  typingDiv.id = 'typing';
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = 'typing-bubble';
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    bubbleDiv.appendChild(dot);
+  }
+  typingDiv.appendChild(bubbleDiv);
+
+  msgs.appendChild(emptyDiv);
+  msgs.appendChild(typingDiv);
+
+  resetCRM();
+  document.getElementById('token-count').textContent = '0';
+  document.getElementById('msg-count').textContent = '0';
+  document.getElementById('cost-est').textContent = '$0.000';
+  document.getElementById('msg-input').value = '';
+  document.getElementById('msg-input').style.height = '';
+}
+
+async function sendMessage(overrideMsg, isSystem = false) {
+  if (isBusy) return;
+
+  const input = document.getElementById('msg-input');
+  const userText = overrideMsg || input.value.trim();
+  if (!userText) return;
+
+  input.value = '';
+  input.style.height = '';
+  isBusy = true;
+  document.getElementById('btn-send').disabled = true;
+
+  hideEmpty();
+
+  if (!isSystem) {
+    appendMessage('user', userText);
+    history.push({ role: 'user', content: userText });
+    msgCount++;
+    document.getElementById('msg-count').textContent = msgCount;
+  }
+
+  showTyping();
+
+  try {
+    const res = await fetch(`${API}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: userText,
+        history: isSystem ? [] : history.slice(0, -1),
+        mode,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+
+    hideTyping();
+    appendMessage('agent', data.text);
+
+    // Update history — add assistant response
+    if (isSystem) {
+      history.push({ role: 'user',      content: userText });
+      history.push({ role: 'assistant', content: data.text });
+    } else {
+      history.push({ role: 'assistant', content: data.text });
+    }
+    msgCount++;
+    document.getElementById('msg-count').textContent = msgCount;
+
+    // Tokens & cost
+    const tokens = (data.input_tokens || 0) + (data.output_tokens || 0);
+    totalTokens += tokens;
+    document.getElementById('token-count').textContent = totalTokens.toLocaleString();
+    // Sonnet 4.6: ~$3/M input, ~$15/M output
+    const cost = ((data.input_tokens || 0) * 3 + (data.output_tokens || 0) * 15) / 1_000_000;
+    const prevCost = parseFloat(document.getElementById('cost-est').textContent.replace('$', '')) || 0;
+    document.getElementById('cost-est').textContent = `$${(prevCost + cost).toFixed(4)}`;
+
+    // CRM
+    if (data.crm && Object.keys(data.crm).length) updateCRM(data.crm);
+
+  } catch (err) {
+    hideTyping();
+    appendMessage('agent', `⚠️ Error al conectar con el servidor: ${err.message}\n\nVerifica que qa_chat_server.py esté corriendo en el puerto 8767.`);
+  }
+
+  isBusy = false;
+  document.getElementById('btn-send').disabled = false;
+  input.focus();
+}
+
+// ── DOM HELPERS ────────────────────────────────────────────
+function hideEmpty() {
+  const e = document.getElementById('empty-state');
+  if (e) e.remove();
+}
+
+function showTyping() {
+  document.getElementById('typing').classList.add('visible');
+  scrollBottom();
+}
+
+function hideTyping() {
+  document.getElementById('typing').classList.remove('visible');
+}
+
+function appendMessage(role, text) {
+  const msgs = document.getElementById('messages');
+  const typing = document.getElementById('typing');
+
+  const now = new Date();
+  const time = now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const roleSpan = document.createElement('span');
+  roleSpan.className = 'msg-role';
+  roleSpan.textContent = role === 'user' ? 'Prospecto' : 'Asesor KLIK';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+
+  const timeSpan = document.createElement('span');
+  timeSpan.className = 'msg-time';
+  timeSpan.textContent = time;
+
+  div.appendChild(roleSpan);
+  div.appendChild(bubble);
+  div.appendChild(timeSpan);
+
+  msgs.insertBefore(div, typing);
+  scrollBottom();
+}
+
+function scrollBottom() {
+  const msgs = document.getElementById('messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ── CRM ────────────────────────────────────────────────────
+const CRM_MAP = {
+  empresa: 'crm-empresa',
+  ciudad:  'crm-ciudad',
+  consumo: 'crm-consumo',
+  nombre:  'crm-nombre',
+  cargo:   'crm-cargo',
+  correo:  'crm-correo',
+  interes: 'crm-interes',
+  tipo:    'crm-tipo',
+};
+
+function updateCRM(crm) {
+  Object.entries(CRM_MAP).forEach(([key, elId]) => {
+    const el = document.getElementById(elId);
+    const val = crm[key];
+    if (val && val !== 'null' && val !== null) {
+      el.textContent = val;
+      el.classList.add('filled');
+    }
+  });
+
+  const estado = crm.estado || 'por_calificar';
+  const badge = document.getElementById('estado-badge');
+  badge.className = `status-badge estado-${estado}`;
+  document.getElementById('estado-label').textContent = ESTADO_LABELS[estado] || estado;
+}
+
+function resetCRM() {
+  Object.values(CRM_MAP).forEach(elId => {
+    const el = document.getElementById(elId);
+    el.textContent = '—';
+    el.classList.remove('filled');
+  });
+  const badge = document.getElementById('estado-badge');
+  badge.className = 'status-badge estado-por_calificar';
+  document.getElementById('estado-label').textContent = 'Por calificar';
+}
+
+// ── EXPORT ─────────────────────────────────────────────────
+function exportConv() {
+  if (history.length === 0) return alert('No hay conversación para exportar.');
+
+  const lines = [`KLIK Agent QA — ${mode.toUpperCase()} — ${new Date().toLocaleString('es-CO')}`, '='.repeat(60), ''];
+
+  history.forEach(m => {
+    const role = m.role === 'user' ? 'PROSPECTO' : 'ASESOR KLIK';
+    lines.push(`[${role}]`);
+    lines.push(m.content);
+    lines.push('');
+  });
+
+  // CRM snapshot
+  lines.push('─'.repeat(40));
+  lines.push('CRM SNAPSHOT:');
+  Object.entries(CRM_MAP).forEach(([key, elId]) => {
+    const val = document.getElementById(elId).textContent;
+    lines.push(`  ${key}: ${val}`);
+  });
+  lines.push(`  estado: ${document.getElementById('estado-label').textContent}`);
+  lines.push(`  tokens: ${totalTokens}`);
+
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(() => showToast('✅ Conversación copiada al portapapeles'))
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = lines.join('\n');
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('✅ Conversación copiada');
+    });
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+    background: '#10b981', color: '#fff', padding: '8px 18px',
+    borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+    zIndex: 9999, boxShadow: '0 4px 16px rgba(0,0,0,.4)',
+  });
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ── INPUT HELPERS ──────────────────────────────────────────
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── INIT ───────────────────────────────────────────────────
+renderScenarios();
+</script>
+</body>
+</html>

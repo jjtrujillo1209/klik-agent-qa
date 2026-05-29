@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLIK Energy - Procesos WhatsApp y Llamada</title>
+<style>
+:root{
+  --bg:#101114;
+  --panel:#171a1f;
+  --panel-2:#1d222a;
+  --line:#2b313a;
+  --text:#f4f7fb;
+  --muted:#9aa6b2;
+  --coral:#e8474a;
+  --green:#25d366;
+  --blue:#4f8cff;
+  --amber:#f3b64b;
+  --ok:#7bd88f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:5;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 28px;
+  background:rgba(16,17,20,.96);
+  border-bottom:1px solid var(--line);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.brand-mark{
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:var(--coral);
+  color:white;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.brand-title{
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:.6px;
+}
+.brand-sub{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
+}
+.nav-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:36px;
+  padding:8px 13px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--panel-2);
+  color:var(--text);
+  text-decoration:none;
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--coral);border-color:var(--coral);color:#fff}
+main{
+  max-width:1180px;
+  margin:0 auto;
+  padding:34px 28px 56px;
+}
+.topline{
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:22px;
+  align-items:stretch;
+  margin-bottom:22px;
+}
+.intro{
+  padding:28px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:8px;
+}
+.eyebrow{
+  color:var(--coral);
+  text-transform:uppercase;
+  letter-spacing:1.6px;
+  font-size:11px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+h1{
+  font-size:34px;
+  line-height:1.1;
+  letter-spacing:0;
+  max-width:760px;
+  margin-bottom:14px;
+}
+.intro p{
+  max-width:720px;
+  color:var(--muted);
+  line-height:1.75;
+  font-size:15px;
+}
+.objective{
+  padding:24px;
+  border:1px solid rgba(123,216,143,.35);
+  background:rgba(123,216,143,.08);
+  border-radius:8px;
+}
+.objective-label{
+  color:var(--ok);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+.objective strong{
+  display:block;
+  font-size:28px;
+  line-height:1;
+  margin-bottom:10px;
+}
+.objective span{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.65;
+}
+.channel-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+}
+.channel{
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:8px;
+  overflow:hidden;
+}
+.channel-head{
+  padding:22px 24px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+.channel-name{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.icon{
+  width:40px;
+  height:40px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  color:#06100a;
+  background:var(--green);
+}
+.icon.call{
+  background:var(--blue);
+  color:white;
+}
+.channel h2{
+  font-size:20px;
+  margin-bottom:3px;
+}
+.channel-kicker{
+  color:var(--muted);
+  font-size:12px;
+}
+.status{
+  padding:5px 10px;
+  border-radius:999px;
+  border:1px solid rgba(123,216,143,.35);
+  color:var(--ok);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.section{
+  padding:22px 24px;
+  border-bottom:1px solid var(--line);
+}
+.section:last-child{border-bottom:0}
+.section-title{
+  font-size:11px;
+  letter-spacing:1.25px;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:900;
+  margin-bottom:12px;
+}
+.tools{
+  display:grid;
+  gap:10px;
+}
+.tool{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--panel-2);
+}
+.tool-name{
+  font-weight:800;
+  font-size:14px;
+}
+.tool-use{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+  line-height:1.45;
+}
+.price{
+  font-size:13px;
+  font-weight:900;
+  color:var(--amber);
+  white-space:nowrap;
+}
+.price.free{color:var(--ok)}
+.price.pending{color:var(--muted)}
+.flow{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.step{
+  min-height:112px;
+  padding:12px;
+  border:1px solid var(--line);
+  background:var(--panel-2);
+  border-radius:8px;
+}
+.step-num{
+  color:var(--coral);
+  font-size:11px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+.step-name{
+  font-size:13px;
+  font-weight:800;
+  line-height:1.25;
+  margin-bottom:6px;
+}
+.step-desc{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.45;
+}
+.questions{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.question{
+  padding:12px;
+  border:1px solid rgba(79,140,255,.28);
+  background:rgba(79,140,255,.08);
+  border-radius:8px;
+  min-height:76px;
+}
+.question b{
+  display:block;
+  font-size:13px;
+  margin-bottom:6px;
+}
+.question span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+.services{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.service{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--panel-2);
+}
+.service b{
+  display:block;
+  font-size:13px;
+  margin-bottom:6px;
+}
+.service span{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+.download-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.download-row .btn{
+  flex:1;
+  min-width:180px;
+}
+.summary{
+  margin-top:22px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.metric{
+  padding:16px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:8px;
+}
+.metric-label{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+.metric-value{
+  font-size:19px;
+  font-weight:900;
+}
+@media (max-width:980px){
+  header{height:auto;align-items:flex-start;flex-direction:column;padding:16px 18px;gap:12px}
+  main{padding:24px 18px 44px}
+  .topline,.channel-grid{grid-template-columns:1fr}
+  .flow,.summary{grid-template-columns:1fr 1fr}
+  .questions,.services{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  h1{font-size:27px}
+  .flow,.summary{grid-template-columns:1fr}
+  .channel-head{align-items:flex-start;flex-direction:column}
+  .nav-actions{width:100%;justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-mark">K</div>
+    <div>
+      <div class="brand-title">KLIK Energy</div>
+      <div class="brand-sub">Procesos de asesor energetico</div>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <a class="btn" href="klik_whatsapp_asesor_energetico.md" download>Descargar WhatsApp MD</a>
+    <a class="btn" href="klik_llamada_asesor_energetico.md" download>Descargar Llamada MD</a>
+    <a class="btn primary" href="#canales">Ver canales</a>
+  </div>
+</header>
+
+<main>
+  <section class="topline">
+    <div class="intro">
+      <div class="eyebrow">Inbound + Outbound</div>
+      <h1>Proceso comercial para WhatsApp y llamada</h1>
+      <p>
+        Esta vista resume como debe operar el asesor energetico de KLIK: identificar la empresa,
+        ubicar la operacion, conocer consumo mensual de luz o kWh, presentar servicios de forma breve,
+        atender PQRS y cerrar con una reunion virtual de 30 minutos.
+      </p>
+    </div>
+    <div class="objective">
+      <div class="objective-label">Objetivo unico</div>
+      <strong>30 min</strong>
+      <span>Agendar un espacio virtual para entender como KLIK puede generar impacto real en la organizacion.</span>
+    </div>
+  </section>
+
+  <section class="summary" aria-label="Resumen del proceso">
+    <div class="metric">
+      <div class="metric-label">Dato 1</div>
+      <div class="metric-value">Empresa</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Dato 2</div>
+      <div class="metric-value">Ubicacion</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Dato 3</div>
+      <div class="metric-value">Luz o kWh</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Salida</div>
+      <div class="metric-value">Agenda</div>
+    </div>
+  </section>
+
+  <section class="channel-grid" id="canales">
+    <article class="channel">
+      <div class="channel-head">
+        <div class="channel-name">
+          <div class="icon">WA</div>
+          <div>
+            <h2>WhatsApp</h2>
+            <div class="channel-kicker">Conversacion inbound/outbound y PQRS</div>
+          </div>
+        </div>
+        <div class="status">Listo para guion</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Herramientas necesarias</div>
+        <div class="tools">
+          <div class="tool">
+            <div>
+              <div class="tool-name">API Claude</div>
+              <div class="tool-use">Respuestas del asesor, clasificacion de PQRS y resumen del lead.</div>
+            </div>
+            <div class="price">20 USD</div>
+          </div>
+          <div class="tool">
+            <div>
+              <div class="tool-name">Twilio</div>
+              <div class="tool-use">Conector operativo para mensajeria, webhooks y trazabilidad.</div>
+            </div>
+            <div class="price">20 USD</div>
+          </div>
+          <div class="tool">
+            <div>
+              <div class="tool-name">WhatsApp Meta API</div>
+              <div class="tool-use">Canal oficial de WhatsApp Business API.</div>
+            </div>
+            <div class="price free">Free</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Flujo recomendado</div>
+        <div class="flow">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-name">Saludo</div>
+            <div class="step-desc">Presentarse como asesor energetico KLIK y abrir diagnostico.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-name">Datos base</div>
+            <div class="step-desc">Pedir empresa, ubicacion y consumo mensual o kWh.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-name">Orientar</div>
+            <div class="step-desc">Explicar comercializacion, DDV o RD segun contexto.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-name">Agendar</div>
+            <div class="step-desc">Proponer dos horarios para reunion virtual de 30 min.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Descarga</div>
+        <div class="download-row">
+          <a class="btn primary" href="klik_whatsapp_asesor_energetico.md" download>Descargar guia WhatsApp</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="channel">
+      <div class="channel-head">
+        <div class="channel-name">
+          <div class="icon call">LL</div>
+          <div>
+            <h2>Llamada</h2>
+            <div class="channel-kicker">Contacto telefonico, PQRS y cierre de cita</div>
+          </div>
+        </div>
+        <div class="status">Listo para operacion</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Herramientas necesarias</div>
+        <div class="tools">
+          <div class="tool">
+            <div>
+              <div class="tool-name">N8N</div>
+              <div class="tool-use">Orquestacion de flujos, CRM, alertas, registros y automatizaciones.</div>
+            </div>
+            <div class="price pending">Por definir</div>
+          </div>
+          <div class="tool">
+            <div>
+              <div class="tool-name">Bird</div>
+              <div class="tool-use">Canal de llamadas, mensajeria, seguimiento y contacto omnicanal.</div>
+            </div>
+            <div class="price pending">Por definir</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Flujo recomendado</div>
+        <div class="flow">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-name">Apertura</div>
+            <div class="step-desc">Presentarse, pedir permiso y aclarar que la llamada sera breve.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-name">Diagnostico</div>
+            <div class="step-desc">Confirmar empresa, ciudad y factura mensual o consumo kWh.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-name">PQRS</div>
+            <div class="step-desc">Resolver o registrar el caso, con siguiente accion clara.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-name">Cierre</div>
+            <div class="step-desc">Agendar reunion virtual de 30 min con correo o WhatsApp.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Descarga</div>
+        <div class="download-row">
+          <a class="btn primary" href="klik_llamada_asesor_energetico.md" download>Descargar guia llamada</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="channel" style="margin-top:22px">
+    <div class="section">
+      <div class="section-title">Preguntas obligatorias del agente</div>
+      <div class="questions">
+        <div class="question">
+          <b>Empresa</b>
+          <span>Nombre legal o comercial para identificar el prospecto y registrar en CRM.</span>
+        </div>
+        <div class="question">
+          <b>Ubicacion</b>
+          <span>Ciudad, sede o zona de operacion para validar cobertura y contexto energetico.</span>
+        </div>
+        <div class="question">
+          <b>Consumo</b>
+          <span>Factura mensual aproximada de luz o consumo mensual en kWh.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Servicios KLIK a mostrar</div>
+      <div class="services">
+        <div class="service">
+          <b>Comercializacion</b>
+          <span>Revision de condiciones de compra de energia segun consumo, horarios y perfil operativo.</span>
+        </div>
+        <div class="service">
+          <b>DDV</b>
+          <span>Demanda Desconectable Voluntaria para generar valor por ajustar consumo en momentos especificos.</span>
+        </div>
+        <div class="service">
+          <b>RD</b>
+          <span>Respuesta a la Demanda para convertir flexibilidad operativa en oportunidad economica.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

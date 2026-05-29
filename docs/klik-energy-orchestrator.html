@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KLIK Energy — Estrategia de Generación de Clientes</title>
+<style>
+  :root {
+    --navy: #111111;
+    --navy-light: #1A1A1A;
+    --blue: #E8474A;
+    --green: #FF8C8E;
+    --li-blue: #0A66C2;
+    --li-bg: #f3f2ef;
+    --white: #FFFFFF;
+    --gray: #8A8A8A;
+    --card: rgba(24,24,24,0.95);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--navy);color:var(--white);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden;}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(232,71,74,0.2);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;}
+  .nav-logo{font-size:1.1rem;font-weight:900;letter-spacing:3px;color:var(--blue);}
+  .nav-logo span{color:var(--green);}
+  .nav-links{display:flex;gap:28px;}
+  .nav-links a{color:var(--gray);text-decoration:none;font-size:.82rem;letter-spacing:.5px;transition:color .2s;}
+  .nav-links a:hover{color:var(--blue);}
+
+  /* HERO */
+  .hero{min-height:78vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:120px 60px 80px;position:relative;overflow:hidden;max-width:1100px;margin:0 auto;}
+  .hero-bg{position:fixed;inset:0;background:radial-gradient(ellipse 55% 60% at 15% 50%, rgba(232,71,74,0.18) 0%, rgba(232,71,74,0.06) 40%, transparent 70%);pointer-events:none;z-index:0;}
+  .grid-lines{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(232,71,74,0.08);border:1px solid rgba(232,71,74,0.25);border-radius:100px;padding:6px 18px;font-size:.75rem;letter-spacing:1.5px;color:var(--blue);text-transform:uppercase;margin-bottom:28px;position:relative;}
+  .badge-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pdot 2s infinite;}
+  @keyframes pdot{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .hero h1{font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:20px;position:relative;}
+  .hero h1 em{font-style:normal;color:var(--green);}
+  .hero-sub{font-size:1.05rem;color:var(--gray);max-width:560px;line-height:1.8;margin-bottom:44px;position:relative;}
+  .hero-pills{display:flex;gap:12px;flex-wrap:wrap;position:relative;}
+  .pill{padding:8px 18px;border-radius:100px;font-size:.8rem;font-weight:600;border:1px solid rgba(232,71,74,0.25);color:var(--blue);background:rgba(232,71,74,0.07);}
+
+  /* SECTION BASE */
+  section{padding:90px 0;}
+  .container{max-width:1100px;margin:0 auto;padding:0 40px;}
+  .section-tag{font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px;}
+  .section-title{font-size:clamp(1.7rem,3.5vw,2.4rem);font-weight:800;line-height:1.2;margin-bottom:16px;}
+  .section-title em{font-style:normal;color:var(--green);}
+  .section-desc{color:var(--gray);font-size:1rem;line-height:1.8;max-width:620px;margin-bottom:48px;}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(232,71,74,0.3),transparent);}
+
+  /* LEAD GENAI — ARQUITECTURA COMPLETA */
+  .lga-section{background:var(--navy-light);}
+  @keyframes dash{to{stroke-dashoffset:-20;}}
+  @keyframes pulse-hub{0%,100%{box-shadow:0 0 30px rgba(232,71,74,0.3),0 0 60px rgba(232,71,74,0.1);}50%{box-shadow:0 0 50px rgba(232,71,74,0.5),0 0 100px rgba(232,71,74,0.15);}}
+
+  /* Query bar */
+  .lga-query{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid rgba(232,71,74,0.25);border-radius:12px;padding:14px 20px;margin-bottom:40px;}
+  .lga-query .q-label{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);white-space:nowrap;}
+  .lga-query .q-val{flex:1;font-size:.9rem;font-weight:600;color:var(--blue);}
+  .lga-query .q-tag{padding:4px 12px;border-radius:100px;background:rgba(232,71,74,0.1);border:1px solid rgba(232,71,74,0.2);font-size:.72rem;color:var(--blue);font-weight:700;}
+
+  /* Sources grid */
+  .lga-sources-label{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;}
+  .lga-sources{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px;}
+  .src-card{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 8px;text-align:center;transition:border-color .25s,transform .25s;}
+  .src-card:hover{border-color:rgba(232,71,74,0.4);transform:translateY(-3px);}
+  .src-card .si{font-size:1.3rem;margin-bottom:6px;}
+  .src-card .sn{font-size:.62rem;font-weight:700;color:var(--white);line-height:1.3;}
+  .src-card .ss{font-size:.58rem;color:var(--gray);margin-top:2px;}
+
+  /* Orchestrator hub row */
+  .lga-orch-row{display:flex;align-items:center;gap:16px;margin-bottom:24px;}
+  .lga-orch-arrow{flex:1;height:2px;background:linear-gradient(90deg,transparent,rgba(232,71,74,0.4),var(--blue));position:relative;}
+  .lga-orch-arrow::after{content:'▶';position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:var(--blue);font-size:.7rem;}
+  .lga-hub-card{background:linear-gradient(135deg,rgba(232,71,74,0.18),rgba(232,71,74,0.06));border:2px solid var(--blue);border-radius:16px;padding:20px 32px;display:flex;align-items:center;gap:16px;animation:pulse-hub 3s ease-in-out infinite;white-space:nowrap;}
+  .lga-hub-card .hc-icon{font-size:2rem;}
+  .lga-hub-card .hc-name{font-size:1.1rem;font-weight:900;color:var(--blue);letter-spacing:.5px;}
+  .lga-hub-card .hc-sub{font-size:.72rem;color:var(--gray);}
+  .lga-orch-out{display:flex;flex-direction:column;gap:4px;flex:1;}
+  .lga-orch-out-line{height:2px;background:linear-gradient(90deg,var(--blue),rgba(232,71,74,0.3),transparent);}
+
+  /* Pipeline steps */
+  .lga-pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+  .pipe-step{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 12px;position:relative;transition:border-color .25s,transform .25s;}
+  .pipe-step:hover{border-color:rgba(232,71,74,0.35);transform:translateY(-4px);}
+  .pipe-step::before{content:attr(data-n);position:absolute;top:10px;right:12px;font-size:1.4rem;font-weight:900;color:rgba(232,71,74,0.12);line-height:1;}
+  .pipe-step.is-active{border-color:rgba(232,71,74,0.3);}
+  .ps-icon{font-size:1.4rem;margin-bottom:10px;}
+  .ps-title{font-size:.78rem;font-weight:800;color:var(--white);margin-bottom:6px;line-height:1.3;}
+  .ps-api{font-size:.65rem;font-weight:700;color:var(--blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+  .ps-details{list-style:none;display:flex;flex-direction:column;gap:4px;}
+  .ps-details li{font-size:.62rem;color:var(--gray);padding-left:10px;position:relative;line-height:1.4;}
+  .ps-details li::before{content:'·';position:absolute;left:0;color:rgba(232,71,74,0.6);font-weight:900;}
+
+  /* Cascade enrichment inside step 4 */
+  .cascade-row{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
+  .casc-chip{padding:3px 7px;border-radius:4px;font-size:.58rem;font-weight:700;border:1px solid;}
+  .casc-1{background:rgba(232,71,74,0.12);border-color:rgba(232,71,74,0.3);color:var(--blue);}
+  .casc-2{background:rgba(255,140,142,0.08);border-color:rgba(255,140,142,0.25);color:var(--green);}
+  .casc-3{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.12);color:var(--gray);}
+
+  /* Output cards */
+  .lga-outputs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px;}
+  .out-card{background:var(--card);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,0.07);}
+  .out-card.out-highlight{border-color:rgba(232,71,74,0.3);background:rgba(232,71,74,0.05);}
+  .out-icon{font-size:1.6rem;flex-shrink:0;}
+  .out-title{font-size:.8rem;font-weight:700;color:var(--white);}
+  .out-sub{font-size:.68rem;color:var(--gray);margin-top:2px;line-height:1.4;}
+
+  /* Month badge */
+  .month-badge{display:flex;align-items:center;gap:16px;margin-top:20px;padding:16px 24px;background:rgba(232,71,74,0.06);border:1px solid rgba(232,71,74,0.2);border-radius:12px;}
+  .month-badge .mb-val{font-size:2.4rem;font-weight:900;color:var(--blue);flex-shrink:0;}
+  .month-badge .mb-txt{font-size:.85rem;color:var(--gray);line-height:1.6;}
+  .month-badge .mb-txt strong{color:var(--white);display:block;}
+
+  /* OUTREACH SEQUENCE */
+  .outreach-wrap{margin-top:40px;}
+  .outreach-label{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:20px;}
+  /* Timeline track */
+  .outreach-track{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:32px;}
+  .outreach-track::before{content:'';position:absolute;top:28px;left:calc(12.5%);right:calc(12.5%);height:2px;background:linear-gradient(90deg,#0A66C2,#E8474A,#25D366,#FF8C8E);z-index:0;}
+  .ot-step{display:flex;flex-direction:column;align-items:center;gap:0;position:relative;z-index:1;}
+  .ot-bubble{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:3px solid;flex-shrink:0;background:var(--navy-light);}
+  .ot-li .ot-bubble{border-color:#0A66C2;box-shadow:0 0 16px rgba(10,102,194,0.35);}
+  .ot-wa .ot-bubble{border-color:#25D366;box-shadow:0 0 16px rgba(37,211,102,0.3);}
+  .ot-em .ot-bubble{border-color:rgba(232,71,74,0.7);box-shadow:0 0 16px rgba(232,71,74,0.2);}
+  .ot-ca .ot-bubble{border-color:#FF8C8E;box-shadow:0 0 16px rgba(255,140,142,0.25);}
+  .ot-day{font-size:.62rem;font-weight:900;letter-spacing:.5px;margin-top:10px;}
+  .ot-li .ot-day{color:#0A66C2;}
+  .ot-wa .ot-day{color:#25D366;}
+  .ot-em .ot-day{color:var(--blue);}
+  .ot-ca .ot-day{color:var(--green);}
+  .ot-name{font-size:.7rem;font-weight:700;color:var(--white);margin-top:2px;}
+  .ot-action{font-size:.62rem;color:var(--gray);text-align:center;margin-top:3px;line-height:1.4;max-width:110px;}
+
+  /* Channel detail cards */
+  .outreach-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .oc-card{border-radius:12px;padding:20px;border:1px solid;transition:transform .25s;}
+  .oc-card:hover{transform:translateY(-4px);}
+  .oc-li{background:rgba(10,102,194,0.06);border-color:rgba(10,102,194,0.25);}
+  .oc-wa{background:rgba(37,211,102,0.05);border-color:rgba(37,211,102,0.2);}
+  .oc-em{background:rgba(232,71,74,0.05);border-color:rgba(232,71,74,0.2);}
+  .oc-ca{background:rgba(255,140,142,0.04);border-color:rgba(255,140,142,0.18);}
+  .oc-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .oc-icon{font-size:1.3rem;}
+  .oc-ch{font-size:.82rem;font-weight:800;}
+  .oc-li .oc-ch{color:#4D9FE8;}
+  .oc-wa .oc-ch{color:#25D366;}
+  .oc-em .oc-ch{color:var(--blue);}
+  .oc-ca .oc-ch{color:var(--green);}
+  .oc-timing{font-size:.62rem;border-radius:100px;padding:2px 8px;font-weight:700;margin-left:auto;}
+  .oc-li .oc-timing{background:rgba(10,102,194,0.15);color:#4D9FE8;}
+  .oc-wa .oc-timing{background:rgba(37,211,102,0.12);color:#25D366;}
+  .oc-em .oc-timing{background:rgba(232,71,74,0.1);color:var(--blue);}
+  .oc-ca .oc-timing{background:rgba(255,140,142,0.1);color:var(--green);}
+  .oc-msg{font-size:.75rem;color:rgba(255,255,255,0.7);line-height:1.65;font-style:italic;border-left:2px solid;padding-left:10px;margin-bottom:12px;}
+  .oc-li .oc-msg{border-color:rgba(10,102,194,0.4);}
+  .oc-wa .oc-msg{border-color:rgba(37,211,102,0.35);}
+  .oc-em .oc-msg{border-color:rgba(232,71,74,0.35);}
+  .oc-ca .oc-msg{border-color:rgba(255,140,142,0.3);}
+  .oc-meta{display:flex;flex-direction:column;gap:5px;}
+  .oc-meta li{font-size:.65rem;color:var(--gray);padding-left:12px;position:relative;line-height:1.4;}
+  .oc-meta li::before{content:'→';position:absolute;left:0;font-size:.6rem;}
+  .oc-li .oc-meta li::before{color:#4D9FE8;}
+  .oc-wa .oc-meta li::before{color:#25D366;}
+  .oc-em .oc-meta li::before{color:var(--blue);}
+  .oc-ca .oc-meta li::before{color:var(--green);}
+
+  /* Expandable process inside outreach cards */
+  .oc-card{cursor:pointer;transition:transform .2s, box-shadow .2s;}
+  .oc-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
+  .oc-card.expanded{transform:translateY(-3px);}
+
+  .oc-process{
+    max-height:0;overflow:hidden;
+    transition:max-height .35s ease, opacity .3s ease, padding .3s ease;
+    opacity:0;padding-top:0;margin-top:0;
+  }
+  .oc-card.expanded .oc-process{
+    max-height:600px;opacity:1;
+    margin-top:14px;padding-top:14px;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+
+  .oc-steps{display:flex;flex-direction:column;position:relative;}
+  /* Connector line between steps */
+  .oc-steps::before{
+    content:'';position:absolute;left:10px;top:20px;
+    bottom:20px;width:1px;
+  }
+  .oc-li .oc-steps::before{background:linear-gradient(to bottom,rgba(10,102,194,0.3),transparent);}
+  .oc-em .oc-steps::before{background:linear-gradient(to bottom,rgba(232,71,74,0.3),transparent);}
+  .oc-wa .oc-steps::before{background:linear-gradient(to bottom,rgba(37,211,102,0.25),transparent);}
+  .oc-ca .oc-steps::before{background:linear-gradient(to bottom,rgba(255,140,142,0.25),transparent);}
+
+  .oc-step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;}
+  .oc-step-num{
+    width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.62rem;font-weight:900;flex-shrink:0;
+    position:relative;z-index:1;
+  }
+  .oc-li .oc-step-num{background:#0A66C2;color:#fff;box-shadow:0 0 0 3px rgba(10,102,194,0.15);}
+  .oc-em .oc-step-num{background:var(--blue);color:#fff;box-shadow:0 0 0 3px rgba(232,71,74,0.12);}
+  .oc-wa .oc-step-num{background:#25D366;color:#111;box-shadow:0 0 0 3px rgba(37,211,102,0.12);}
+  .oc-ca .oc-step-num{background:var(--green);color:#111;box-shadow:0 0 0 3px rgba(255,140,142,0.12);}
+
+  .oc-step-title{font-size:.73rem;font-weight:700;color:var(--white);margin-bottom:3px;line-height:1.3;}
+  .oc-step-desc{font-size:.66rem;color:rgba(255,255,255,0.5);line-height:1.5;}
+
+  .oc-toggle{display:flex;justify-content:center;margin-top:12px;}
+  .oc-toggle-btn{
+    font-size:.63rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+    padding:5px 14px;border-radius:6px;
+    border:1px solid rgba(255,255,255,0.12);
+    color:rgba(255,255,255,0.4);
+    background:rgba(255,255,255,0.04);
+    transition:all .2s;
+  }
+  .oc-card:hover .oc-toggle-btn{color:rgba(255,255,255,0.65);border-color:rgba(255,255,255,0.2);}
+  .oc-card.expanded .oc-toggle-btn::after{content:' ▲';}
+  .oc-card:not(.expanded) .oc-toggle-btn::after{content:' ▼';}
+
+  /* No-response re-engagement strip */
+  .reeng-strip{margin-top:20px;background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .reeng-label{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);white-space:nowrap;}
+  .reeng-steps{display:flex;gap:10px;flex-wrap:wrap;}
+  .reeng-chip{padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--gray);}
+  .reeng-chip strong{color:var(--white);}
+
+  /* MQL ROUTING */
+  .routing-wrap{margin-top:40px;}
+  .routing-header{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
+  .routing-header-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(232,71,74,0.4),transparent);}
+  .routing-title-block{text-align:center;}
+  .routing-title-block .rt-tag{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);}
+  .routing-title-block .rt-title{font-size:1rem;font-weight:800;color:var(--white);margin-top:4px;}
+
+  /* Decision diamond */
+  .routing-decision{display:flex;flex-direction:column;align-items:center;margin-bottom:20px;}
+  .mql-input{display:flex;align-items:center;gap:10px;background:rgba(232,71,74,0.1);border:1px solid rgba(232,71,74,0.35);border-radius:10px;padding:10px 20px;margin-bottom:14px;}
+  .mql-input .mi-icon{font-size:1.2rem;}
+  .mql-input .mi-text{font-size:.8rem;font-weight:700;color:var(--white);}
+  .mql-input .mi-sub{font-size:.65rem;color:var(--gray);margin-top:1px;}
+  .route-arrow-down{width:2px;height:24px;background:linear-gradient(to bottom,var(--blue),rgba(232,71,74,0.4));margin:0 auto;}
+  .diamond{width:180px;height:56px;background:linear-gradient(135deg,rgba(232,71,74,0.15),rgba(232,71,74,0.05));border:2px solid var(--blue);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);clip-path:none;transform:none;position:relative;}
+  .diamond .d-q{font-size:.75rem;font-weight:900;color:var(--blue);text-align:center;line-height:1.3;}
+  .diamond .d-sub{font-size:.6rem;color:var(--gray);}
+  /* Branches */
+  .routing-branches{display:grid;grid-template-columns:1fr 80px 1fr;gap:0;margin-top:0;align-items:start;}
+  .branch-connector{display:flex;flex-direction:column;align-items:center;padding-top:0;}
+  .bc-line-h{height:2px;width:100%;margin-top:28px;}
+  .bc-line-h.left{background:linear-gradient(90deg,transparent,#4CAF50);}
+  .bc-line-h.right{background:linear-gradient(90deg,rgba(232,71,74,0.6),transparent);}
+  .bc-center{display:flex;flex-direction:column;align-items:center;}
+  .bc-center .bc-v{width:2px;height:28px;background:var(--blue);}
+  .branch-label{font-size:.62rem;font-weight:900;letter-spacing:.5px;text-align:center;padding:3px 10px;border-radius:100px;margin-bottom:12px;margin-top:4px;}
+  .branch-label.mnr{background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);color:#4CAF50;}
+  .branch-label.mr{background:rgba(232,71,74,0.12);border:1px solid rgba(232,71,74,0.3);color:var(--blue);}
+  /* Market cards */
+  .market-card{border-radius:14px;padding:22px;border:1px solid;}
+  .market-card.mnr-card{background:rgba(76,175,80,0.05);border-color:rgba(76,175,80,0.25);}
+  .market-card.mr-card{background:rgba(232,71,74,0.05);border-color:rgba(232,71,74,0.2);}
+  .mc-badge{display:inline-block;padding:4px 12px;border-radius:100px;font-size:.72rem;font-weight:900;letter-spacing:.5px;margin-bottom:14px;}
+  .mnr-card .mc-badge{background:rgba(76,175,80,0.15);color:#4CAF50;border:1px solid rgba(76,175,80,0.3);}
+  .mr-card .mc-badge{background:rgba(232,71,74,0.1);color:var(--blue);border:1px solid rgba(232,71,74,0.25);}
+  .mc-threshold{font-size:.78rem;color:var(--gray);margin-bottom:16px;line-height:1.5;}
+  .mc-threshold strong{color:var(--white);}
+  /* Product pills inside market card */
+  .mc-products{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+  .mc-product{border-radius:8px;padding:12px 14px;border:1px solid;}
+  .mc-product.prod-main{border-color:rgba(76,175,80,0.3);background:rgba(76,175,80,0.07);}
+  .mc-product.prod-add{border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);}
+  .mc-product.prod-klik{border-color:rgba(232,71,74,0.25);background:rgba(232,71,74,0.06);}
+  .mc-product .mp-tag{font-size:.6rem;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;}
+  .prod-main .mp-tag{color:#4CAF50;}
+  .prod-add .mp-tag{color:var(--gray);}
+  .prod-klik .mp-tag{color:var(--blue);}
+  .mc-product .mp-name{font-size:.82rem;font-weight:700;color:var(--white);}
+  .mc-product .mp-desc{font-size:.68rem;color:var(--gray);margin-top:3px;line-height:1.5;}
+  /* Tiers inside market card */
+  .mc-tiers{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
+  .mc-tier-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);}
+  .tier-badge{font-size:.6rem;font-weight:900;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
+  .tb-g{background:rgba(232,71,74,0.2);color:var(--blue);}
+  .tb-m{background:rgba(255,140,142,0.12);color:var(--green);}
+  .tb-p{background:rgba(255,255,255,0.06);color:var(--gray);}
+  .tier-range{font-size:.65rem;color:var(--gray);flex-shrink:0;min-width:70px;}
+  .tier-roles{font-size:.63rem;color:rgba(255,255,255,0.6);line-height:1.4;}
+  /* Scoring strip */
+  .routing-score{margin-top:24px;background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 20px;}
+  .rs-title{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;}
+  .rs-pills{display:flex;gap:10px;flex-wrap:wrap;}
+  .rs-pill{padding:6px 14px;border-radius:7px;font-size:.72rem;font-weight:600;border:1px solid;display:flex;align-items:center;gap:6px;}
+  .rs-pill .rp-pts{font-weight:900;}
+  .rsp-hot{background:rgba(232,71,74,0.1);border-color:rgba(232,71,74,0.3);color:var(--blue);}
+  .rsp-warm{background:rgba(255,140,142,0.07);border-color:rgba(255,140,142,0.2);color:var(--green);}
+  .rsp-cold{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.1);color:var(--gray);}
+  .rsp-mnr{background:rgba(76,175,80,0.08);border-color:rgba(76,175,80,0.25);color:#4CAF50;}
+  .rsp-bonus{background:rgba(76,175,80,0.05);border-color:rgba(76,175,80,0.15);color:rgba(76,175,80,0.8);}
+
+  /* COST COMPARISON */
+  .cost-section{background:var(--navy);}
+  .cost-row{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center;margin-top:56px;}
+  .cost-card{border-radius:16px;padding:36px 32px;text-align:center;}
+  .cost-card.bad{background:rgba(255,60,60,0.05);border:1px solid rgba(255,80,80,0.2);}
+  .cost-card.good{background:rgba(255,140,142,0.05);border:1px solid rgba(255,140,142,0.25);}
+  .cost-label{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;}
+  .cost-label.red{color:rgba(255,100,100,0.8);}
+  .cost-label.gn{color:var(--green);}
+  .cost-source{font-size:.8rem;color:var(--gray);margin-bottom:20px;line-height:1.5;}
+  .cost-val{font-size:4rem;font-weight:900;line-height:1;margin-bottom:8px;letter-spacing:-2px;}
+  .cost-val.red{color:rgba(255,80,80,0.75);}
+  .cost-val.gn{color:var(--green);}
+  .cost-unit{font-size:.85rem;font-weight:600;margin-bottom:16px;}
+  .cost-unit.red{color:rgba(255,100,100,0.6);}
+  .cost-unit.gn{color:rgba(255,140,142,0.7);}
+  .cost-tags{display:flex;flex-direction:column;gap:7px;margin-top:16px;}
+  .cost-tag{font-size:.75rem;padding:5px 10px;border-radius:6px;}
+  .cost-tag.red{background:rgba(255,60,60,0.08);color:rgba(255,130,130,0.8);}
+  .cost-tag.gn{background:rgba(255,140,142,0.08);color:rgba(255,140,142,0.85);}
+  .cost-mid{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .cost-arrow-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .cost-arrow-line{width:2px;height:60px;background:linear-gradient(to bottom,rgba(255,80,80,0.5),var(--blue));border-radius:1px;}
+  .cost-pct{padding:8px 16px;border-radius:8px;background:rgba(255,140,142,0.1);border:1px solid rgba(255,140,142,0.3);text-align:center;}
+  .cost-pct .pv{font-size:1.5rem;font-weight:900;color:var(--green);display:block;}
+  .cost-pct .pl{font-size:.68rem;color:var(--gray);letter-spacing:.5px;}
+  .cost-multiplier{padding:6px 14px;border-radius:100px;background:rgba(232,71,74,0.08);border:1px solid rgba(232,71,74,0.2);font-size:.78rem;color:var(--blue);font-weight:700;}
+
+  /* ICP SECTION */
+  .icp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .icp-card{background:var(--card);border:1px solid rgba(232,71,74,0.12);border-radius:14px;padding:28px;transition:border-color .3s,transform .3s;}
+  .icp-card:hover{border-color:rgba(232,71,74,0.35);transform:translateY(-4px);}
+  .icp-icon{font-size:2rem;margin-bottom:14px;}
+  .icp-card h3{font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--white);}
+  .icp-card .role{font-size:.78rem;color:var(--blue);font-weight:600;margin-bottom:12px;}
+  .icp-card ul{list-style:none;display:flex;flex-direction:column;gap:7px;}
+  .icp-card ul li{font-size:.8rem;color:var(--gray);padding-left:14px;position:relative;line-height:1.5;}
+  .icp-card ul li::before{content:'·';position:absolute;left:0;color:var(--green);font-weight:900;}
+  .icp-hook{margin-top:14px;padding:10px 14px;background:rgba(255,140,142,0.06);border:1px solid rgba(255,140,142,0.15);border-radius:8px;font-size:.78rem;color:var(--green);line-height:1.5;}
+  .icp-hook strong{display:block;margin-bottom:2px;font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,140,142,0.6);}
+
+  /* HOOKS SECTION */
+  .hooks-section{background:var(--navy-light);}
+  .hooks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+  .hook-card{background:var(--card);border:1px solid rgba(232,71,74,0.1);border-radius:14px;padding:28px;display:flex;gap:18px;align-items:flex-start;transition:border-color .3s;}
+  .hook-card:hover{border-color:rgba(232,71,74,0.3);}
+  .hook-num{width:40px;height:40px;border-radius:10px;background:rgba(232,71,74,0.1);border:1px solid rgba(232,71,74,0.2);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;color:var(--blue);flex-shrink:0;}
+  .hook-body h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+  .hook-body p{font-size:.83rem;color:var(--gray);line-height:1.6;}
+  .hook-body .quote{margin-top:12px;padding:10px 14px;border-left:3px solid var(--blue);background:rgba(232,71,74,0.05);font-size:.82rem;color:var(--blue);font-style:italic;border-radius:0 6px 6px 0;}
+
+  /* CAMPAIGNS */
+  .camp-tabs{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .camp-tab{padding:9px 20px;border-radius:7px;border:1px solid rgba(232,71,74,0.2);background:transparent;color:var(--gray);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;}
+  .camp-tab.active{background:rgba(232,71,74,0.1);border-color:var(--blue);color:var(--blue);}
+  .camp-tab:hover:not(.active){border-color:rgba(232,71,74,0.4);color:var(--white);}
+  .camp-panel{display:none;}
+  .camp-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+
+  /* LINKEDIN MOCKUPS */
+  .li-ad{background:white;border-radius:10px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+  .li-ad-header{padding:14px 16px;display:flex;align-items:center;gap:11px;border-bottom:1px solid #e8e8e8;}
+  .li-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#E8474A,#FF8C8E);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;color:#111111;flex-shrink:0;}
+  .li-company-name{font-size:.88rem;font-weight:700;color:#191919;}
+  .li-meta-txt{font-size:.72rem;color:#666;}
+  .li-promoted-tag{display:inline-block;font-size:.65rem;color:#888;border:1px solid #bbb;border-radius:2px;padding:0 4px;margin-top:2px;}
+  .li-ad-body{padding:14px 16px 16px;}
+  .li-ad-copy{font-size:.87rem;color:#191919;line-height:1.55;margin-bottom:12px;}
+  .li-ad-banner{width:100%;height:88px;background:linear-gradient(135deg,#111111 0%,#2a1010 100%);border:1px solid rgba(232,71,74,0.25);border-radius:6px;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+  .li-ad-banner span{font-size:.8rem;color:#FF9090;font-weight:700;font-weight:600;}
+  .li-target-line{font-size:.7rem;color:#888;margin-bottom:12px;line-height:1.4;}
+  .li-target-line strong{color:#444;}
+  .li-cta-btn{background:#0A66C2;color:white;border:none;border-radius:4px;padding:9px 18px;font-size:.85rem;font-weight:700;cursor:pointer;width:100%;font-family:inherit;letter-spacing:.2px;}
+
+  .li-form-wrap{background:white;border-radius:10px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+  .li-form-head{background:#0A66C2;padding:14px 18px;}
+  .li-form-head h4{color:white;font-size:.95rem;font-weight:700;}
+  .li-form-head p{color:rgba(255,255,255,0.75);font-size:.75rem;margin-top:3px;}
+  .li-form-body{padding:18px;}
+  .li-field{margin-bottom:12px;}
+  .li-field label{display:block;font-size:.72rem;color:#444;font-weight:600;margin-bottom:5px;}
+  .li-input-row{display:flex;align-items:center;gap:8px;background:#f3f2ef;border:1px solid #d0ccc8;border-radius:4px;padding:9px 12px;}
+  .li-input-row.is-auto{border-color:rgba(10,102,194,.35);background:rgba(10,102,194,.04);}
+  .li-input-val{font-size:.82rem;color:#191919;flex:1;}
+  .auto-chip{font-size:.62rem;color:#0A66C2;background:rgba(10,102,194,.12);border-radius:3px;padding:1px 7px;font-weight:700;flex-shrink:0;letter-spacing:.3px;}
+  .li-select{width:100%;background:#f3f2ef;border:1px solid #d0ccc8;border-radius:4px;padding:9px 12px;font-size:.82rem;color:#191919;font-family:inherit;-webkit-appearance:none;appearance:none;}
+  .li-submit-btn{background:#0A66C2;color:white;border:none;border-radius:4px;padding:11px;font-size:.88rem;font-weight:700;cursor:pointer;width:100%;margin-top:6px;font-family:inherit;}
+  .li-submit-btn:hover{background:#0856a8;}
+  .li-privacy-note{font-size:.65rem;color:#888;text-align:center;margin-top:9px;line-height:1.4;}
+
+  /* CAMP META */
+  .camp-meta{margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap;}
+  .meta-chip{padding:5px 12px;border-radius:100px;font-size:.72rem;font-weight:600;background:rgba(232,71,74,0.08);border:1px solid rgba(232,71,74,0.2);color:var(--blue);}
+
+  /* FUNNEL */
+  .funnel-wrap{margin-top:64px;}
+  .funnel-label{font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:24px;}
+  .funnel{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:8px;}
+  .f-step{display:flex;align-items:center;}
+  .f-box{background:var(--card);border:1px solid rgba(232,71,74,0.15);border-radius:10px;padding:16px 18px;text-align:center;min-width:108px;transition:border-color .25s,transform .25s;}
+  .f-box:hover{border-color:var(--blue);transform:translateY(-4px);}
+  .f-box .fi{font-size:1.3rem;margin-bottom:6px;}
+  .f-box .fl{font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.3px;}
+  .f-box .fs{font-size:.65rem;color:var(--gray);margin-top:3px;}
+  .f-arrow{font-size:1.2rem;color:rgba(232,71,74,0.35);padding:0 6px;flex-shrink:0;align-self:center;padding-bottom:4px;}
+  .f-box.is-end{border-color:rgba(255,140,142,0.3);background:rgba(255,140,142,0.04);}
+  .f-box.is-end .fl{color:var(--green);}
+
+  /* BEST PRACTICES */
+  .bp-section{background:var(--navy-light);}
+  .bp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .bp-card{background:var(--card);border:1px solid rgba(232,71,74,0.1);border-radius:14px;padding:26px;}
+  .bp-card h4{font-size:.88rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--white);}
+  .bp-card h4 .bi{font-size:1.1rem;}
+  .bp-card ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .bp-card ul li{font-size:.8rem;color:var(--gray);padding-left:16px;position:relative;line-height:1.55;}
+  .bp-card ul li::before{content:'→';position:absolute;left:0;color:var(--green);font-size:.7rem;top:1px;}
+
+  /* FOOTER */
+  footer{padding:56px 40px;text-align:center;border-top:1px solid rgba(232,71,74,0.1);}
+  .footer-logo{font-size:1.6rem;font-weight:900;letter-spacing:3px;color:var(--blue);margin-bottom:10px;}
+  .footer-logo span{color:var(--green);}
+  .footer-line{color:var(--gray);font-size:.9rem;margin-bottom:28px;}
+  .footer-btn{display:inline-block;background:#111111;border:2px solid #E8474A;color:#E8474A!important;color:var(--navy);font-weight:800;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:.95rem;letter-spacing:.3px;transition:transform .2s,box-shadow .2s;}
+  .footer-btn:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(232,71,74,0.25);}
+  .footer-copy{margin-top:32px;font-size:.72rem;color:rgba(255,255,255,0.18);}
+
+  @media(max-width:768px){
+    nav{padding:12px 20px;}
+    .nav-links{display:none;}
+    .hero{padding:100px 24px 60px;}
+    .container{padding:0 24px;}
+    .icp-grid,.hooks-grid,.bp-grid{grid-template-columns:1fr;}
+    .camp-panel.active{grid-template-columns:1fr;}
+    .funnel{gap:4px;}
+  }
+</style>
+</head>
+<body>
+<div class="hero-bg"></div>
+<div class="grid-lines"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">KLIK<span>.</span>ENERGY</div>
+  <div class="nav-links">
+    <a href="#leadgenai">Lead GenAI</a>
+    <a href="#costos">Costo / lead</a>
+    <a href="#icp">A quién</a>
+    <a href="#hooks">Mensajes</a>
+    <a href="#campanas">Campañas</a>
+    <a href="#buenas-practicas">Prácticas</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="position:relative;z-index:1;">
+<div class="hero">
+  <div class="hero-badge"><span class="badge-dot"></span>Estrategia Comercial</div>
+  <h1>Generación de clientes<br>para <em>KLIK Energy</em></h1>
+  <p class="hero-sub">A quién prospectar, qué mensaje usar y cómo capturar leads calificados con LinkedIn Lead Gen Forms — sin fricciones, con datos reales.</p>
+  <div class="hero-pills">
+    <div class="pill">Perfil de cliente ideal</div>
+    <div class="pill">Mensajes que abren puertas</div>
+    <div class="pill">3 campañas LinkedIn</div>
+    <div class="pill">Embudo de conversión</div>
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- LEAD GENAI DIAGRAM -->
+<section class="lga-section" id="leadgenai" style="position:relative;z-index:1;">
+  <div class="container">
+    <div class="section-tag">00 — Arquitectura del Sistema</div>
+    <h2 class="section-title"><em>Lead GenAI</em> — pipeline completo</h2>
+    <p class="section-desc">5 agentes especializados coordinados por Claude AI. Desde un query de búsqueda hasta un prospecto con nombre, cargo, email y teléfono — listo para el equipo comercial KLIK.</p>
+
+    <!-- QUERY INPUT -->
+    <div class="lga-query">
+      <div class="q-label">Query de entrada</div>
+      <div class="q-val">"manufactura industrial Colombia +200 empleados"</div>
+      <div class="q-tag">Personalizable</div>
+    </div>
+
+    <!-- 6 DISCOVERY SOURCES -->
+    <div class="lga-sources-label">Paso 1 — Agente de Descubrimiento · 7 fuentes simultáneas</div>
+    <div class="lga-sources" style="grid-template-columns:repeat(7,1fr);">
+      <div class="src-card">
+        <div class="si">🗺️</div>
+        <div class="sn">Google Maps</div>
+        <div class="ss">Playwright</div>
+      </div>
+      <div class="src-card">
+        <div class="si">🔵</div>
+        <div class="sn">Bing Maps</div>
+        <div class="ss">Playwright</div>
+      </div>
+      <div class="src-card">
+        <div class="si">📒</div>
+        <div class="sn">Páginas Amarillas</div>
+        <div class="ss">Colombia</div>
+      </div>
+      <div class="src-card">
+        <div class="si">🏭</div>
+        <div class="sn">Kompass B2B</div>
+        <div class="ss">Industrial</div>
+      </div>
+      <div class="src-card">
+        <div class="si">🌐</div>
+        <div class="sn">OpenStreetMap</div>
+        <div class="ss">Overpass API</div>
+      </div>
+      <div class="src-card">
+        <div class="si">🔍</div>
+        <div class="sn">Google Search</div>
+        <div class="ss">Orgánico</div>
+      </div>
+      <div class="src-card">
+        <div class="si">⚡</div>
+        <div class="sn">XM</div>
+        <div class="ss">Mercado eléctrico</div>
+      </div>
+    </div>
+
+    <!-- ORCHESTRATOR HUB -->
+    <div class="lga-orch-row">
+      <div class="lga-orch-arrow"></div>
+      <div class="lga-hub-card">
+        <div class="hc-icon">⚡</div>
+        <div>
+          <div class="hc-name">Lead GenAI Orchestrator</div>
+          <div class="hc-sub">Claude AI · pipeline_agent.py · 5 herramientas</div>
+        </div>
+      </div>
+      <div class="lga-orch-arrow" style="transform:scaleX(-1);"></div>
+    </div>
+
+    <!-- 5 PIPELINE STEPS -->
+    <div class="lga-pipeline">
+
+      <div class="pipe-step is-active" data-n="1">
+        <div class="ps-icon">🏢</div>
+        <div class="ps-title">Empresas + Filtro HubSpot</div>
+        <div class="ps-api">company_finder.py · Apollo API</div>
+        <ul class="ps-details">
+          <li>Dedup vs CRM existente</li>
+          <li>Solo empresas NUEVAS pasan</li>
+          <li>Apollo: LinkedIn, empleados, industria</li>
+          <li>Dedupe por sede / sucursal</li>
+          <li>Filtro de relevancia por sector</li>
+        </ul>
+      </div>
+
+      <div class="pipe-step" data-n="2">
+        <div class="ps-icon">🪪</div>
+        <div class="ps-title">NIT Oficial Colombia</div>
+        <div class="ps-api">nit_resolver.py · RUES</div>
+        <ul class="ps-details">
+          <li>Registro Único Empresarial</li>
+          <li>9 primeros dígitos del NIT</li>
+          <li>Checkpoint local (no reprocesa)</li>
+          <li>Validación de vigencia</li>
+          <li>Dato oficial para propuestas</li>
+        </ul>
+      </div>
+
+      <div class="pipe-step" data-n="3">
+        <div class="ps-icon">👤</div>
+        <div class="ps-title">Contactos Decisores</div>
+        <div class="ps-api">salesnav_scraper.py · LinkedIn SN</div>
+        <ul class="ps-details">
+          <li>CFO · Director Financiero</li>
+          <li>Director de Operaciones</li>
+          <li>Gerente de Planta · COO</li>
+          <li>Hasta 5 contactos / empresa</li>
+          <li>URL LinkedIn verificada</li>
+        </ul>
+      </div>
+
+      <div class="pipe-step" data-n="4">
+        <div class="ps-icon">📧</div>
+        <div class="ps-title">Enriquecimiento Cascada</div>
+        <div class="ps-api">contact_enricher.py</div>
+        <ul class="ps-details">
+          <li>Email + Teléfono verificados</li>
+          <li>Desactiva proveedor sin créditos</li>
+        </ul>
+        <div class="cascade-row">
+          <span class="casc-chip casc-1">① BetterContact</span>
+          <span class="casc-chip casc-2">② Apollo</span>
+          <span class="casc-chip casc-3">③ Lusha</span>
+        </div>
+      </div>
+
+      <div class="pipe-step" data-n="5">
+        <div class="ps-icon">📤</div>
+        <div class="ps-title">Exportación</div>
+        <div class="ps-api">exporter.py · Excel + CSV</div>
+        <ul class="ps-details">
+          <li>Links LinkedIn clickeables</li>
+          <li>Plantilla import HubSpot</li>
+          <li>Empresa + NIT + Contacto</li>
+          <li>Email + Teléfono + Cargo</li>
+          <li>Timestamp automático</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- OUTPUTS -->
+    <div class="lga-sources-label">Salidas del pipeline</div>
+    <div class="lga-outputs">
+      <div class="out-card out-highlight">
+        <div class="out-icon">📊</div>
+        <div>
+          <div class="out-title">Excel con links LinkedIn</div>
+          <div class="out-sub">Empresa · NIT · Contacto · Cargo · Email · Teléfono · LinkedIn URL clickeable</div>
+        </div>
+      </div>
+      <div class="out-card out-highlight">
+        <div class="out-icon">🗄️</div>
+        <div>
+          <div class="out-title">CSV — Plantilla HubSpot</div>
+          <div class="out-sub">Import directo al CRM. Mapeo de campos automático. Sin limpieza manual.</div>
+        </div>
+      </div>
+      <div class="out-card">
+        <div class="out-icon">📞</div>
+        <div>
+          <div class="out-title">Lista de llamada KLIK</div>
+          <div class="out-sub">Prospecto calificado → nombre + cargo + email + teléfono → equipo comercial listo para contactar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTREACH SEQUENCE -->
+    <div class="outreach-wrap">
+      <div class="outreach-label">Secuencia de outreach outbound — post pipeline</div>
+
+      <!-- TIMELINE BUBBLES -->
+      <div class="outreach-track">
+        <div class="ot-step ot-li">
+          <div class="ot-bubble">💼</div>
+          <div class="ot-day">ETAPA 1</div>
+          <div class="ot-name">LinkedIn</div>
+          <div class="ot-action">Solicitud de conexión + nota personalizada</div>
+        </div>
+        <div class="ot-step ot-em">
+          <div class="ot-bubble">✉️</div>
+          <div class="ot-day">ETAPA 2</div>
+          <div class="ot-name">Email</div>
+          <div class="ot-action">Correo personalizado con datos reales de la empresa</div>
+        </div>
+        <div class="ot-step ot-wa">
+          <div class="ot-bubble">💬</div>
+          <div class="ot-day">ETAPA 3</div>
+          <div class="ot-name">WhatsApp</div>
+          <div class="ot-action">Mensaje directo al teléfono verificado</div>
+        </div>
+        <div class="ot-step ot-ca">
+          <div class="ot-bubble">📞</div>
+          <div class="ot-day">ETAPA 4</div>
+          <div class="ot-name">Llamada</div>
+          <div class="ot-action">Llamada directa con contexto completo del prospecto</div>
+        </div>
+      </div>
+
+      <!-- CHANNEL DETAIL CARDS -->
+      <div class="outreach-cards">
+
+        <!-- LINKEDIN -->
+        <div class="oc-card oc-li" onclick="this.classList.toggle('expanded')">
+          <div class="oc-header">
+            <div class="oc-icon">💼</div>
+            <div class="oc-ch">LinkedIn</div>
+            <div class="oc-timing">Etapa 1</div>
+          </div>
+          <div class="oc-msg">"Hola [Nombre], vi que [Empresa] opera en manufactura industrial. Empresas similares como Bavaria están generando ingresos adicionales con DDV de la CREG. ¿Vale la pena conversar 15 min?"</div>
+          <ul class="oc-meta">
+            <li>Usa nombre + empresa del Excel (Sales Navigator)</li>
+            <li>Lead Gen Form como segundo toque si acepta</li>
+            <li>Seguimiento automático si no responde en 48h</li>
+          </ul>
+          <div class="oc-toggle"><span class="oc-toggle-btn">Ver proceso</span></div>
+          <div class="oc-process">
+            <div class="oc-steps">
+              <div class="oc-step">
+                <div class="oc-step-num">1</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Visualización de perfil</div>
+                  <div class="oc-step-desc">Visitar el perfil del prospecto — recibe notificación de "alguien vio tu perfil", genera curiosidad antes del primer contacto.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">2</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Enviar solicitud de conexión con mensaje</div>
+                  <div class="oc-step-desc">Nota personalizada con nombre, empresa y gancho económico (DDV / ahorro en tarifa). Máx 300 caracteres, directo al punto.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">3</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Interactuar con publicación reciente</div>
+                  <div class="oc-step-desc">Like o comentario relevante en el último post del prospecto. Construye presencia en su feed antes del follow-up.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">4</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Mensaje de follow-up</div>
+                  <div class="oc-step-desc">Si no responde en 48h: DM corto referenciando la conexión aceptada + Link a Lead Gen Form de KLIK con cálculo de ahorro.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="oc-card oc-em" onclick="this.classList.toggle('expanded')">
+          <div class="oc-header">
+            <div class="oc-icon">✉️</div>
+            <div class="oc-ch">Correo</div>
+            <div class="oc-timing">Etapa 2</div>
+          </div>
+          <div class="oc-msg">"Asunto: [Empresa] podría generar ingresos DDV — cálculo gratis. / [Nombre], las empresas industriales en [Ciudad] con consumo similar al de [Empresa] generan entre $X y $Y USD/año con DDV..."</div>
+          <ul class="oc-meta">
+            <li>Email verificado por BetterContact / Apollo</li>
+            <li>Personalizar con NIT, ciudad e industria del Excel</li>
+            <li>CTA único: agendar 20 min en Calendly</li>
+          </ul>
+          <div class="oc-toggle"><span class="oc-toggle-btn">Ver proceso</span></div>
+          <div class="oc-process">
+            <div class="oc-steps">
+              <div class="oc-step">
+                <div class="oc-step-num">1</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Verificación de email</div>
+                  <div class="oc-step-desc">BetterContact → Apollo → Lusha. Solo se envía si el email tiene confianza ≥ 85%. Evita rebotes y daño de reputación de dominio.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">2</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Personalización con datos del pipeline</div>
+                  <div class="oc-step-desc">Asunto y cuerpo incluyen nombre, empresa, ciudad, sector e industria extraídos del Excel generado por Lead GenAI.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">3</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Envío con asunto gancho + un solo CTA</div>
+                  <div class="oc-step-desc">Asunto orientado a ahorro económico. Cuerpo corto (150 palabras). CTA único: agendar 20 min en Calendly.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">4</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Follow-up automático a las 48h</div>
+                  <div class="oc-step-desc">Si no abre: reenvío con asunto diferente. Si abrió pero no respondió: segundo email con calculadora de ahorro DDV adjunta.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WHATSAPP -->
+        <div class="oc-card oc-wa" onclick="this.classList.toggle('expanded')">
+          <div class="oc-header">
+            <div class="oc-icon">💬</div>
+            <div class="oc-ch">WhatsApp</div>
+            <div class="oc-timing">Etapa 3</div>
+          </div>
+          <div class="oc-msg">"Buenos días [Nombre], soy de KLIK Energy. Le escribo porque [Empresa] puede calificar para el programa DDV — básicamente, cobrar por reducir consumo en horas pico. ¿Le envío el cálculo?"</div>
+          <ul class="oc-meta">
+            <li>Teléfono verificado por BetterContact / Lusha</li>
+            <li>Mensaje corto, directo, con gancho económico</li>
+            <li>Adjuntar PDF resumen si acepta recibir info</li>
+          </ul>
+          <div class="oc-toggle"><span class="oc-toggle-btn">Ver proceso</span></div>
+          <div class="oc-process">
+            <div class="oc-steps">
+              <div class="oc-step">
+                <div class="oc-step-num">1</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Mensaje de apertura</div>
+                  <div class="oc-step-desc">Presentación corta con nombre, empresa y gancho concreto. Tono directo y humano, sin sonar automatizado.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">2</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Conversación proactiva</div>
+                  <div class="oc-step-desc">Responder preguntas y mantener el hilo activo. Identificar interés y nivel de consumo para personalizar el siguiente paso.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">3</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Envío de 1-pager KLIK</div>
+                  <div class="oc-step-desc">PDF de una página: qué es KLIK, servicios (Comercialización, DDV, RD) y CTA claro — agendar llamada o visitar klikenergy.com.</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">4</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Agendar llamada</div>
+                  <div class="oc-step-desc">Cerrar con horario concreto o link Calendly en el mismo chat. La llamada es el único objetivo de la secuencia WhatsApp.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LLAMADA -->
+        <div class="oc-card oc-ca" onclick="this.classList.toggle('expanded')">
+          <div class="oc-header">
+            <div class="oc-icon">📞</div>
+            <div class="oc-ch">Llamada</div>
+            <div class="oc-timing">Etapa 4</div>
+          </div>
+          <div class="oc-msg">"Llamar con guión: cargo + empresa + sector conocidos. Mencionar que ya les escribió por LinkedIn y email. Preguntar por el consumo actual y si conocen el DDV."</div>
+          <ul class="oc-meta">
+            <li>Rep llama con ficha completa del prospecto en pantalla</li>
+            <li>Cargo, empresa, NIT, consumo estimado, sector</li>
+            <li>Objetivo: agendar demo de plataforma KLIK</li>
+          </ul>
+          <div class="oc-toggle"><span class="oc-toggle-btn">Ver proceso</span></div>
+          <div class="oc-process">
+            <div class="oc-steps">
+              <div class="oc-step">
+                <div class="oc-step-num">1</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Cargar ficha del prospecto</div>
+                  <div class="oc-step-desc">Rep ve en pantalla: nombre, cargo, empresa, NIT, sector, consumo estimado y canal previo contactado (LinkedIn / email / WA).</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">2</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Pitch de apertura (30 seg)</div>
+                  <div class="oc-step-desc">Referencia los contactos previos. Presenta KLIK en una oración. Pregunta de calificación: "¿Conoce el programa DDV de XM?"</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">3</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Identificar pain point energético</div>
+                  <div class="oc-step-desc">Preguntar por factura actual, horario de operación y picos de demanda. Conectar respuesta con el producto KLIK correcto (MNR/MR).</div>
+                </div>
+              </div>
+              <div class="oc-step">
+                <div class="oc-step-num">4</div>
+                <div class="oc-step-body">
+                  <div class="oc-step-title">Agendar demo de plataforma KLIK</div>
+                  <div class="oc-step-desc">Objetivo único de la llamada: demo de 20 min. Si no decide en el momento, enviar Calendly por WhatsApp al cerrar la llamada.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RE-ENGAGEMENT STRIP -->
+      <div class="reeng-strip">
+        <div class="reeng-label">Sin respuesta →</div>
+        <div class="reeng-steps">
+          <div class="reeng-chip"><strong>D+10</strong> LinkedIn follow-up con caso Bavaria / Claro</div>
+          <div class="reeng-chip"><strong>D+14</strong> Email con calculadora de ahorro adjunta</div>
+          <div class="reeng-chip"><strong>D+21</strong> Llamada final + cierre de secuencia</div>
+          <div class="reeng-chip"><strong>D+30</strong> Marcar "nurturing" · reactivar en 60 días</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MQL ROUTING SECTION -->
+    <div class="routing-wrap">
+      <div class="routing-header">
+        <div class="routing-header-line" style="background:linear-gradient(90deg,transparent,rgba(232,71,74,0.4));"></div>
+        <div class="routing-title-block">
+          <div class="rt-tag">Clasificación automática</div>
+          <div class="rt-title">Routing de MQLs → Producto KLIK</div>
+        </div>
+        <div class="routing-header-line"></div>
+      </div>
+
+      <!-- Decision node -->
+      <div class="routing-decision">
+        <div class="mql-input">
+          <div class="mi-icon">⚡</div>
+          <div>
+            <div class="mi-text">MQL Calificado</div>
+            <div class="mi-sub">Score ≥ 45 · datos completos</div>
+          </div>
+        </div>
+        <div class="route-arrow-down"></div>
+        <div class="diamond">
+          <div class="d-q">¿Consumo ≥ 55 MWh/mes?</div>
+          <div class="d-sub">CREG · Umbral Mercado No Regulado</div>
+        </div>
+      </div>
+
+      <!-- Branches -->
+      <div class="routing-branches">
+
+        <!-- Left: MNR -->
+        <div>
+          <div class="bc-line-h left"></div>
+          <div class="branch-label mnr" style="margin-top:8px;">SÍ → MERCADO NO REGULADO</div>
+          <div class="market-card mnr-card">
+            <div class="mc-badge">MNR · ≥ 55 MWh/mes</div>
+            <div class="mc-threshold"><strong>Pitch:</strong> upselling dentro de grandes organizaciones · tarifa negociada a la medida del perfil de consumo</div>
+            <div class="mc-products">
+              <div class="mc-product prod-main">
+                <div class="mp-tag">Comercialización</div>
+                <div class="mp-name">Tarifa bilateral negociada</div>
+                <div class="mp-desc">Contrato directo · precio por fuera de bolsa · optimización según curva de carga</div>
+              </div>
+              <div class="mc-product prod-main">
+                <div class="mp-tag">DDV</div>
+                <div class="mp-name">Desconexión Voluntaria</div>
+                <div class="mp-desc">Monetiza capacidad ociosa de plantas y sedes · ingresos adicionales por flexibilidad</div>
+              </div>
+              <div class="mc-product prod-main">
+                <div class="mp-tag">RD</div>
+                <div class="mp-name">Respuesta a la Demanda</div>
+                <div class="mp-desc">Reduce picos de demanda en horario crítico · crédito en factura + incentivos XM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center connector -->
+        <div class="branch-connector">
+          <div class="bc-center">
+            <div class="bc-v"></div>
+          </div>
+        </div>
+
+        <!-- Right: MR -->
+        <div>
+          <div class="bc-line-h right"></div>
+          <div class="branch-label mr" style="margin-top:8px;">NO → MERCADO REGULADO</div>
+          <div class="market-card mr-card">
+            <div class="mc-badge">MR · &lt; 55 MWh/mes</div>
+            <div class="mc-threshold"><strong>Pitch:</strong> reducción de costos sin cambiar de comercializador · tarifa regulada CREG · entrada de bajo riesgo</div>
+            <div class="mc-products">
+              <div class="mc-product prod-klik">
+                <div class="mp-tag">Comercialización</div>
+                <div class="mp-name">Tarifa regulada CREG</div>
+                <div class="mp-desc">Sin libre elección de comercializador · valor en eficiencia y gestión, no en precio de compra</div>
+              </div>
+              <div class="mc-product prod-klik">
+                <div class="mp-tag">DDV</div>
+                <div class="mp-name">Desconexión Voluntaria</div>
+                <div class="mp-desc">Ingresos adicionales sin cambiar proveedor · contrato de disponibilidad de baja fricción</div>
+              </div>
+              <div class="mc-product prod-klik">
+                <div class="mp-tag">RD</div>
+                <div class="mp-name">Respuesta a la Demanda</div>
+                <div class="mp-desc">Crédito en factura regulada · optimización de curva de carga dentro del marco CREG</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end routing-branches -->
+
+      <!-- Scoring strip -->
+      <div class="routing-score">
+        <div class="rs-title">Sistema de Scoring · Lead GenAI</div>
+        <div class="rs-pills">
+          <div class="rs-pill rsp-hot"><span class="rp-pts">HOT</span> Score &gt; 70</div>
+          <div class="rs-pill rsp-warm"><span class="rp-pts">WARM</span> Score 50–70</div>
+          <div class="rs-pill rsp-cold"><span class="rp-pts">COLD</span> Score &lt; 50</div>
+          <div class="rs-pill rsp-mnr">MNR ≥ 55k kWh/mes <span class="rp-pts">+15 pts</span></div>
+          <div class="rs-pill rsp-bonus">market_type = No Regulado <span class="rp-pts">+10 pts</span></div>
+        </div>
+      </div>
+
+    </div><!-- end routing-wrap -->
+
+    <div class="month-badge">
+      <div class="mb-val">&lt;1</div>
+      <div class="mb-txt">
+        <strong>mes de query a MQL con datos completos</strong>
+        Query → 7 fuentes → HubSpot → RUES → Sales Nav → Enriquecimiento → 4 canales de outreach → Demo agendada.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COST COMPARISON -->
+<section class="cost-section" id="costos" style="position:relative;z-index:1;">
+  <div class="container">
+    <div class="section-tag">00B — Eficiencia de Inversión</div>
+    <h2 class="section-title">El costo real de<br>un <em>lead en energía</em></h2>
+    <p class="section-desc">Las comercializadoras nacionales invierten en canales tradicionales con un costo promedio de <strong style="color:rgba(255,100,100,0.9)">$190 USD por lead</strong>. Lead GenAI lo reduce a <strong style="color:var(--green)">$10 USD</strong>.</p>
+
+    <div class="cost-row">
+
+      <!-- BAD -->
+      <div class="cost-card bad">
+        <div class="cost-label red">Comercializadoras nacionales</div>
+        <div class="cost-source">Canales tradicionales: eventos, referidos, fuerza de ventas presencial, llamadas en frío</div>
+        <div class="cost-val red">$190</div>
+        <div class="cost-unit red">USD por lead</div>
+        <div class="cost-tags">
+          <div class="cost-tag red">Ciclo de venta: 3–6 meses</div>
+          <div class="cost-tag red">Datos de baja calidad</div>
+          <div class="cost-tag red">Escalabilidad limitada</div>
+          <div class="cost-tag red">Sin trazabilidad digital</div>
+        </div>
+      </div>
+
+      <!-- MIDDLE -->
+      <div class="cost-mid">
+        <div class="cost-multiplier">19× más barato</div>
+        <div class="cost-arrow-wrap">
+          <div class="cost-arrow-line"></div>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" style="color:var(--green)"><path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="cost-pct">
+          <span class="pv">−94%</span>
+          <span class="pl">costo / lead</span>
+        </div>
+      </div>
+
+      <!-- GOOD -->
+      <div class="cost-card good">
+        <div class="cost-label gn">KLIK × Lead GenAI</div>
+        <div class="cost-source">LinkedIn Lead Gen Forms + scoring IA + CRM automático + nurturing digital</div>
+        <div class="cost-val gn">$10</div>
+        <div class="cost-unit gn">USD por lead</div>
+        <div class="cost-tags">
+          <div class="cost-tag gn">Ciclo: &lt;1 mes (prospecto → MQL)</div>
+          <div class="cost-tag gn">Datos verificados de LinkedIn</div>
+          <div class="cost-tag gn">Escala sin costo lineal</div>
+          <div class="cost-tag gn">Trazabilidad completa en CRM</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ICP -->
+<section id="icp" style="position:relative;z-index:1;">
+  <div class="container">
+    <div class="section-tag">01 — Perfil de Cliente Ideal</div>
+    <h2 class="section-title">¿A quién le <em>vende</em> KLIK?</h2>
+    <p class="section-desc">Tres perfiles con poder de decisión, cada uno con un dolor distinto y una puerta de entrada diferente.</p>
+    <div class="icp-grid">
+
+      <div class="icp-card">
+        <div class="icp-icon">💰</div>
+        <h3>El que controla los costos</h3>
+        <div class="role">CFO · Director Financiero · Gerente Administrativo</div>
+        <ul>
+          <li>La energía es su 2do o 3er costo operativo más alto</li>
+          <li>Recibe facturas pero no entiende los componentes</li>
+          <li>Le urge reducir OPEX sin afectar producción</li>
+          <li>Sectores: manufactura, retail, telecomunicaciones</li>
+        </ul>
+        <div class="icp-hook"><strong>Puerta de entrada</strong>"¿Cuánto de tu factura de energía podrías convertir en ingreso?"</div>
+      </div>
+
+      <div class="icp-card">
+        <div class="icp-icon">🏭</div>
+        <h3>El que opera la planta</h3>
+        <div class="role">Gerente de Planta · Director de Energía · COO</div>
+        <ul>
+          <li>Sabe exactamente cuándo consume más y por qué</li>
+          <li>Tiene flexibilidad de carga en ciertas horas</li>
+          <li>Busca justificar inversiones en eficiencia</li>
+          <li>Sectores: alimentos, cemento, papel, frío industrial</li>
+        </ul>
+        <div class="icp-hook"><strong>Puerta de entrada</strong>"Tu planta ya puede cobrar por bajar consumo en pico — ¿lo sabías?"</div>
+      </div>
+
+      <div class="icp-card">
+        <div class="icp-icon">🔋</div>
+        <h3>El que lidera la transformación</h3>
+        <div class="role">CTO · Director de Innovación · VP Sostenibilidad</div>
+        <ul>
+          <li>Tiene metas ESG y de huella de carbono</li>
+          <li>Busca tecnología que genere datos y reportes</li>
+          <li>Necesita demostrar ROI de proyectos digitales</li>
+          <li>Sectores: telecomunicaciones, banca, retail moderno</li>
+        </ul>
+        <div class="icp-hook"><strong>Puerta de entrada</strong>"Datos de consumo en tiempo real + ingresos DDV + reporte ESG automático."</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOOKS -->
+<section class="hooks-section" id="hooks" style="position:relative;z-index:1;">
+  <div class="container">
+    <div class="section-tag">02 — Mensajes que Abren Puertas</div>
+    <h2 class="section-title">Los 4 <em>ganchos</em> que funcionan</h2>
+    <p class="section-desc">Cada mensaje apunta a un dolor concreto. Usarlos en el primer contacto aumenta la tasa de respuesta frente a mensajes genéricos de "ahorro de energía".</p>
+    <div class="hooks-grid">
+
+      <div class="hook-card">
+        <div class="hook-num">1</div>
+        <div class="hook-body">
+          <h4>El dinero que ya existe</h4>
+          <p>La mayoría de empresas industriales desconoce el programa DDV de la CREG. No es promesa de ahorro futuro — es ingreso que ya podrían estar recibiendo.</p>
+          <div class="quote">"Empresas similares a la tuya generaron $6M USD en los últimos años reduciendo consumo en horas pico. ¿Ya tienes acceso a ese programa?"</div>
+        </div>
+      </div>
+
+      <div class="hook-card">
+        <div class="hook-num">2</div>
+        <div class="hook-body">
+          <h4>El costo oculto en la factura</h4>
+          <p>Las tarifas horarias tienen componentes que pocas empresas optimizan: cargos de respaldo, restricciones, bloques comercializables. KLIK los convierte en palancas.</p>
+          <div class="quote">"El 12% de ahorro promedio de nuestros clientes no viene de consumir menos — viene de comprar mejor. ¿Cuándo fue la última auditoría de tu factura?"</div>
+        </div>
+      </div>
+
+      <div class="hook-card">
+        <div class="hook-num">3</div>
+        <div class="hook-body">
+          <h4>La prueba social del sector</h4>
+          <p>Claro, Tigo, Bavaria, Postobón, D1 ya lo hacen. Cuando el prospecto ve que sus competidores o pares de industria ya están en el programa, la conversación cambia.</p>
+          <div class="quote">"Bavaria y Postobón ya generan ingresos DDV con KLIK. ¿Tu operación tiene el mismo potencial? Te mostramos el cálculo en 20 minutos."</div>
+        </div>
+      </div>
+
+      <div class="hook-card">
+        <div class="hook-num">4</div>
+        <div class="hook-body">
+          <h4>La urgencia regulatoria</h4>
+          <p>Las reglas del mercado de energía en Colombia evolucionan. Los que se inscriben hoy en DDV/RD tienen ventaja frente a los que esperan. Crea urgencia real sin presión artificial.</p>
+          <div class="quote">"Los cupos para el programa DDV en tu región tienen límite de frontera. ¿Ya verificamos si tu empresa califica antes de que se asignen?"</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CAMPAIGNS -->
+<section id="campanas" style="position:relative;z-index:1;">
+  <div class="container">
+    <div class="section-tag">03 — Campañas LinkedIn</div>
+    <h2 class="section-title">3 campañas con <em>Lead Gen Forms</em></h2>
+    <p class="section-desc">Los formularios nativos de LinkedIn se pre-llenan con datos del perfil. El prospecto solo responde 2 preguntas de calificación y hace clic. Conversión 3× mayor que landing pages.</p>
+
+    <div class="camp-tabs">
+      <button class="camp-tab active" onclick="showCamp(0)">Campaña 1 — CFOs &amp; Finanzas</button>
+      <button class="camp-tab" onclick="showCamp(1)">Campaña 2 — Operaciones</button>
+      <button class="camp-tab" onclick="showCamp(2)">Campaña 3 — Digital &amp; ESG</button>
+    </div>
+
+    <!-- C1 -->
+    <div class="camp-panel active" id="camp-0">
+      <div>
+        <div class="camp-meta">
+          <span class="meta-chip">CFOs · Directores Financieros</span>
+          <span class="meta-chip">Manufactura · Retail · Telecom</span>
+          <span class="meta-chip">CTA: Calcular ahorro</span>
+        </div>
+        <p style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Anuncio LinkedIn</p>
+        <div class="li-ad">
+          <div class="li-ad-header">
+            <div class="li-avatar">K</div>
+            <div>
+              <div class="li-company-name">KLIK Energy</div>
+              <div class="li-meta-txt">Empresa de servicios energéticos · Colombia</div>
+              <span class="li-promoted-tag">Promocionado</span>
+            </div>
+          </div>
+          <div class="li-ad-body">
+            <div class="li-ad-copy"><strong>¿Tu empresa paga energía de más?</strong><br>En Colombia el 78% de las empresas industriales no conoce el programa DDV de la CREG.<br><br>Calcula en 2 minutos cuánto podrías <strong>generar</strong> — no solo ahorrar.</div>
+            <div class="li-ad-banner"><span>⚡ $6M+ generados para clientes KLIK</span></div>
+            <div class="li-target-line"><strong>Dirigido a:</strong> CFOs, Directores Financieros, Gerentes de Operaciones · Manufactura, Retail, Telecomunicaciones · Colombia</div>
+            <button class="li-cta-btn">Calcular mi ahorro →</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Formulario Lead Gen (pre-llenado)</p>
+        <div class="li-form-wrap">
+          <div class="li-form-head">
+            <h4>Calcula cuánto puede generar tu empresa</h4>
+            <p>KLIK Energy · 30 segundos · Sin compromiso</p>
+          </div>
+          <div class="li-form-body">
+            <div class="li-field"><label>Nombre completo</label><div class="li-input-row is-auto"><span class="li-input-val">Carlos Rodríguez Torres</span><span class="auto-chip">AUTO</span></div></div>
+            <div class="li-field"><label>Empresa</label><div class="li-input-row is-auto"><span class="li-input-val">Grupo Industrial ABC S.A.</span><span class="auto-chip">AUTO</span></div></div>
+            <div class="li-field"><label>Cargo</label><div class="li-input-row is-auto"><span class="li-input-val">Director Financiero</span><span class="auto-chip">AUTO</span></div></div>
+            <div class="li-field"><label>Consumo mensual estimado</label><select class="li-select"><option>Seleccionar...</option><option>Menos de 100 MWh/mes</option><option>100 – 500 MWh/mes</option><option>Más de 500 MWh/mes</option></select></div>
+            <div class="li-field"><label>¿Conoce el programa DDV de la CREG?</label><select class="li-select"><option>Seleccionar...</option><option>Sí, lo conozco</option><option>No, nunca he escuchado de él</option></select></div>
+            <button class="li-submit-btn">Calcular mi ahorro →</button>
+            <div class="li-privacy-note">Al enviar autorizas a KLIK Energy contactarte. Datos tratados bajo política de privacidad de LinkedIn.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C2 -->
+    <div class="camp-panel" id="camp-1">
+      <div>
+        <div class="camp-meta">
+          <span class="meta-chip">Gerentes de Planta · COOs</span>
+          <span class="meta-chip">Alimentos · Cemento · Frío industrial</span>
+          <span class="meta-chip">CTA: Ver DDV en acción</span>
+        </div>
+        <p style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Anuncio LinkedIn</p>
+        <div class="li-ad">
+          <div class="li-ad-header">
+            <div class="li-avatar">K</div>
+            <div>
+              <div class="li-company-name">KLIK Energy</div>
+              <div class="li-meta-txt">Empresa de servicios energéticos · Colombia</div>
+              <span class="li-promoted-tag">Promocionado</span>
+            </div>
+          </div>
+          <div class="li-ad-body">
+            <div class="li-ad-copy"><strong>Convierte el consumo de tu planta en ingresos</strong><br>El programa DDV permite cobrar por reducir consumo en horas pico, sin afectar tu operación.<br><br>Bavaria, D1 y Smurfit ya lo hacen. ¿Tu planta tiene ese potencial?</div>
+            <div class="li-ad-banner"><span>🏭 4.8 GWh/día gestionados · 750+ fronteras activas</span></div>
+            <div class="li-target-line"><strong>Dirigido a:</strong> Gerentes de Planta, Directores de Energía, COOs · Industria pesada, Alimentos, Retail · Colombia</div>
+            <button class="li-cta-btn">Ver cómo funciona el DDV →</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Formulario Lead Gen (pre-llenado)</p>
+        <div class="li-form-wrap">
+          <div class="li-form-head">
+            <h4>Descubre el potencial DDV de tu operación</h4>
+            <p>KLIK Energy · Diagnóstico gratuito en 20 min</p>
+          </div>
+          <div class="li-form-body">
+            <div class="li-field"><label>Nombre completo</label><div class="li-input-row is-auto"><span class="li-input-val">Andrés Moreno López</span><span class="auto-chip">AUTO</span></div></div>
+            <div class="li-field"><label>Empresa</label><div class="li-input-row is-auto"><span class="li-input-val">Plásticos del Valle S.A.</span><span class="auto-chip">AUTO</span></div></div>
+            <div class="li-field"><label>Sector industrial</label><select class="li-select"><option>Seleccionar...</option><option>Manufactura / Industria pesada</option><option>Alimentos y Bebidas</option><option>Retail / Distribución</option><option>Telecomunicaciones</option><option>Salud / Hospitales</option><option>Otro</option></select></div>
+            <div class="li-field"><label>¿Tiene medidor inteligente (AMI)?</label><select class="li-select"><option>Seleccionar...</option><option>Sí</option><option>No</option><option>No sé</option></select></div>
+            <div class="li-field"><label>Mejor horario para llamada</label><select class="li-select"><option>Seleccionar...</option><option>Mañana 8am–12pm</option><option>Tarde 2pm–5pm</option><option>Prefiero WhatsApp / email</option></select></div>
+            <button class="li-submit-btn">Ver cómo funciona el DDV →</button>
+            <div class="li-privacy-note">Al enviar autorizas a KLIK Energy contactarte. Datos tratados bajo política de privacidad de LinkedIn.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C3 -->
+    <div class="camp-panel" id="camp-2">
+      <div>
+        <div class="camp-meta">
+          <span class="meta-chip">CTOs · Directores de Innovación</span>
+          <span class="meta-chip">Telecom · Banca · Retail moderno</span>
+          <span class="meta-chip">CTA: Agendar demo</span>
+        </div>
+        <p style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Anuncio LinkedIn</p>
+        <div class="li-ad">
+          <div class="li-ad-header">
+            <div class="li-avatar">K</div>
+            <div>
+              <div class="li-company-name">KLIK Energy</div>
+              <div class="li-meta-txt">Empresa de servicios energéticos · Colombia</div>
+              <span class="li-promoted-tag">Promocionado</span>
+            </div>
+          </div>
+          <div class="li-ad-body">
+            <div class="li-ad-copy"><strong>Datos de energía en tiempo real + ingresos automáticos</strong><br>La plataforma KLIK monitorea consumo, optimiza tarifas y activa DDV/RD sin intervención manual.<br><br>Ideal para empresas con metas ESG y estrategias de transformación digital.</div>
+            <div class="li-ad-banner"><span>📊 Monitoreo en vivo · Reportes ESG automáticos</span></div>
+            <div class="li-target-line"><strong>Dirigido a:</strong> CTOs, Directores de Transformación Digital, VPs de Sostenibilidad · +200 empleados · Colombia</div>
+            <button class="li-cta-btn">Agendar demo de plataforma →</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Formulario Lead Gen (pre-llenado)</p>
+        <div class="li-form-wrap">
+          <div class="li-form-head">
+            <h4>Agenda tu demo — plataforma KLIK</h4>
+            <p>KLIK Energy · 30 min · Sin costo</p>
+          </div>
+          <div class="li-form-body">
+            <div class="li-field"><label>Nombre completo</label><div class="li-input-row is-auto"><span class="li-input-val">Laura Gómez Vargas</span><span class="auto-chip">AUTO</span></div></div>
+            <div class="li-field"><label>Empresa</label><div class="li-input-row is-auto"><span class="li-input-val">TechGroup Colombia S.A.</span><span class="auto-chip">AUTO</span></div></div>
+            <div class="li-field"><label>¿Cuántas sedes operativas tiene?</label><select class="li-select"><option>Seleccionar...</option><option>1 sede</option><option>2 – 5 sedes</option><option>6 – 20 sedes</option><option>Más de 20 sedes</option></select></div>
+            <div class="li-field"><label>Principal objetivo</label><select class="li-select"><option>Seleccionar...</option><option>Reducir costos de energía</option><option>Cumplir metas ESG / huella de carbono</option><option>Digitalizar gestión energética</option><option>Cumplimiento regulatorio CREG</option></select></div>
+            <button class="li-submit-btn">Agendar demo de plataforma →</button>
+            <div class="li-privacy-note">Al enviar autorizas a KLIK Energy contactarte. Datos tratados bajo política de privacidad de LinkedIn.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUNNEL -->
+    <div class="funnel-wrap">
+      <div class="funnel-label">Embudo — de la impresión al cierre</div>
+      <div class="funnel">
+        <div class="f-step"><div class="f-box"><div class="fi">👁️</div><div class="fl">Impresión</div><div class="fs">Segmentada</div></div></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="f-box"><div class="fi">🖱️</div><div class="fl">Clic en Ad</div><div class="fs">CTR ~2–4%</div></div></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="f-box"><div class="fi">📋</div><div class="fl">Form Auto</div><div class="fs">Pre-llenado</div></div></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="f-box"><div class="fi">✅</div><div class="fl">Submit</div><div class="fs">Conv ~13%</div></div></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="f-box"><div class="fi">🗄️</div><div class="fl">CRM KLIK</div><div class="fs">Automático</div></div></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="f-box"><div class="fi">📞</div><div class="fl">Llamada</div><div class="fs">&lt;24 horas</div></div></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="f-box"><div class="fi">🖥️</div><div class="fl">Demo</div><div class="fs">Plataforma</div></div></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="f-box is-end"><div class="fi">🏆</div><div class="fl">Cierre</div><div class="fs">Cliente KLIK</div></div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BEST PRACTICES -->
+<section class="bp-section" id="buenas-practicas" style="position:relative;z-index:1;">
+  <div class="container">
+    <div class="section-tag">04 — Ejecución</div>
+    <h2 class="section-title">Cómo ejecutar <em>bien</em></h2>
+    <p class="section-desc">Detalles que marcan la diferencia entre una campaña que genera ruido y una que genera clientes.</p>
+    <div class="bp-grid">
+
+      <div class="bp-card">
+        <h4><span class="bi">🕐</span> Horarios y frecuencia</h4>
+        <ul>
+          <li>Publicar martes–jueves 7–9am o 12–1pm</li>
+          <li>Evitar viernes tarde y fines de semana</li>
+          <li>Frecuencia óptima: 3–4 publicaciones/semana</li>
+          <li>Rotar creatividades cada 2 semanas para evitar fatiga</li>
+          <li>Mayor engagement en las primeras 2 horas tras publicar</li>
+        </ul>
+      </div>
+
+      <div class="bp-card">
+        <h4><span class="bi">🎯</span> Segmentación precisa</h4>
+        <ul>
+          <li>Cargo exacto: CFO, Director Financiero, Gerente de Planta</li>
+          <li>Industria: Manufactura, Retail, Telecomunicaciones, Alimentos</li>
+          <li>Tamaño: empresas con +200 empleados</li>
+          <li>Geografía: Bogotá, Medellín, Cali, Barranquilla, Bucaramanga</li>
+          <li>Excluir: empleados KLIK, clientes actuales, competidores</li>
+        </ul>
+      </div>
+
+      <div class="bp-card">
+        <h4><span class="bi">🔁</span> Retargeting por etapa</h4>
+        <ul>
+          <li>Vio el anuncio sin clic → copy con prueba social (Bavaria, Claro)</li>
+          <li>Clic sin submit → variante con caso de estudio en video</li>
+          <li>Submit sin cierre → contenido educativo DDV + urgencia de cupo</li>
+          <li>Excluir a quienes ya enviaron el formulario del pool de retargeting</li>
+          <li>Ventana de retargeting: 30 días</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FOOTER -->
+<footer style="position:relative;z-index:1;">
+  <div class="footer-logo">KLIK<span>.</span>ENERGY</div>
+  <div class="footer-line">La energía inteligente ya llegó a Colombia.</div>
+  <a href="https://www.klikenergy.com" class="footer-btn" target="_blank">Visitar klikenergy.com →</a>
+  <div class="footer-copy">Estrategia de generación de clientes · KLIK Energy · 2026</div>
+</footer>
+
+<script>
+function showCamp(idx) {
+  document.querySelectorAll('.camp-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.camp-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+</script>
+</body>
+</html>
