@@ -118,28 +118,45 @@
                     </div>
                 </div>
 
-                <!-- Metrics Row -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <p class="text-xs text-blue-700 font-semibold mb-1">CPL</p>
-                        <p class="text-2xl font-bold text-blue-900 number-animate" id="cplMetric">$18.65</p>
-                        <p class="text-xs text-blue-600 mt-1">Cost Per Lead</p>
+                <!-- Metrics Row - CPL Scenarios -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                    <!-- Optimistic Scenario (CPL $10) -->
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border-l-4 border-green-500">
+                        <p class="text-xs text-green-700 font-semibold mb-3">🟢 ESCENARIO OPTIMISTA</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-xs text-green-600 font-semibold">CPL</p>
+                                <p class="text-2xl font-bold text-green-900">$10</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-green-600 font-semibold">Leads (a $250)</p>
+                                <p class="text-2xl font-bold text-green-900 number-animate" id="leadsOptimistic">25</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-green-700 mt-2">Mayor CTR, mejor targeting</p>
                     </div>
-                    <div class="bg-emerald-50 p-4 rounded-lg">
-                        <p class="text-xs text-emerald-700 font-semibold mb-1">CVR</p>
-                        <p class="text-2xl font-bold text-emerald-900">20%</p>
-                        <p class="text-xs text-emerald-600 mt-1">Form Conversion</p>
+
+                    <!-- Conservative Scenario (CPL $38) -->
+                    <div class="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-lg border-l-4 border-orange-500">
+                        <p class="text-xs text-orange-700 font-semibold mb-3">🟠 ESCENARIO CONSERVADOR</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-xs text-orange-600 font-semibold">CPL</p>
+                                <p class="text-2xl font-bold text-orange-900">$38</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-orange-600 font-semibold">Leads (a $250)</p>
+                                <p class="text-2xl font-bold text-orange-900 number-animate" id="leadsConservative">6-7</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-orange-700 mt-2">CTR bajo, targeting competitivo</p>
                     </div>
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <p class="text-xs text-purple-700 font-semibold mb-1">ROAS</p>
-                        <p class="text-2xl font-bold text-purple-900 number-animate" id="roasMetric">12:1</p>
-                        <p class="text-xs text-purple-600 mt-1">Return on Ad Spend</p>
-                    </div>
-                    <div class="bg-orange-50 p-4 rounded-lg">
-                        <p class="text-xs text-orange-700 font-semibold mb-1">CTR</p>
-                        <p class="text-2xl font-bold text-orange-900">1.5%</p>
-                        <p class="text-xs text-orange-600 mt-1">Click Through Rate</p>
-                    </div>
+                </div>
+
+                <!-- Historical Range -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mt-4">
+                    <p class="text-xs text-blue-900 font-semibold mb-2">📊 RANGO HISTÓRICO (Tu experiencia)</p>
+                    <p class="text-sm text-blue-800">CPL varía de <strong>$10</strong> (casos optimistas) a <strong>$38</strong> (casos conservadores) en sector energía. Ajusta el presupuesto para ver proyecciones en ambos escenarios.</p>
                 </div>
             </div>
 
@@ -430,14 +447,17 @@
             document.getElementById('mqlCount').textContent = mql.toLocaleString();
             document.getElementById('agendadosCount').textContent = agendados.toLocaleString();
 
-            // Update metrics
-            const cpl = budget / forms || 0;
-            document.getElementById('cplMetric').textContent = '$' + cpl.toFixed(2);
+            // Calculate both CPL scenarios (based on historical energy sector data)
+            const cplOptimistic = 10; // Best case
+            const cplConservative = 38; // Worst case
 
-            // Update ROAS (assuming $220 average ticket value and 40% close rate)
-            const revenue = agendados * 220 * 0.4;
-            const roas = revenue / budget;
-            document.getElementById('roasMetric').textContent = roas.toFixed(1) + ':1';
+            // Calculate leads for each scenario
+            const leadsOptimistic = Math.floor(budget / cplOptimistic);
+            const leadsConservative = Math.floor(budget / cplConservative);
+
+            // Update scenario displays
+            document.getElementById('leadsOptimistic').textContent = leadsOptimistic.toString();
+            document.getElementById('leadsConservative').textContent = leadsConservative + '-' + (leadsConservative + 1);
 
             // Update funnel chart
             updateFunnelChart(impressions, clicks, forms, mql, agendados);
