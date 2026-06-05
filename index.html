@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard LinkedIn Ads Interactivo - Klik Energy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+        * { font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        .gradient-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        .metric-card { padding: 20px; border-radius: 12px; text-align: center; }
+        .slider-track { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        .funnel-bar { height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; color: white; font-weight: 600; margin-bottom: 12px; transition: all 0.3s ease; }
+        .stage-label { font-size: 14px; font-weight: 600; color: #4b5563; margin-bottom: 8px; }
+        .number-animate { transition: all 0.3s ease; }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-purple { background: #e9d5ff; color: #6b21a8; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen py-8 px-4">
+        <!-- Header -->
+        <div class="gradient-header text-white rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="max-w-7xl mx-auto">
+                <h1 class="text-5xl font-bold mb-2">📊 LinkedIn Ads Dashboard</h1>
+                <p class="text-xl opacity-90 mb-4">Estrategia Interactiva para Klik Energy</p>
+                <div class="flex gap-3 flex-wrap">
+                    <span class="badge badge-blue">Objetivo: 30 leads agendados/mes</span>
+                    <span class="badge badge-green">Target: Directores Energía</span>
+                    <span class="badge badge-purple">Ajusta el presupuesto abajo →</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto space-y-8">
+
+            <!-- Budget Slider -->
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">💰 Presupuesto Mensual Interactivo</h2>
+
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="text-lg font-semibold text-gray-700">Ajusta tu presupuesto:</label>
+                        <div class="text-right">
+                            <div class="text-4xl font-bold text-purple-600 number-animate" id="budgetDisplay">$1,100</div>
+                            <div class="text-sm text-gray-600">presupuesto total mensual</div>
+                        </div>
+                    </div>
+                    <input type="range" id="budgetSlider" min="500" max="5000" value="1100" step="100"
+                           class="w-full h-3 rounded-lg appearance-none bg-gray-300 slider-track"
+                           style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);"/>
+                    <div class="flex justify-between text-xs text-gray-600 mt-2">
+                        <span>$500 (Test)</span>
+                        <span>$5,000 (Agresivo)</span>
+                    </div>
+                </div>
+
+                <!-- Budget Breakdown -->
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
+                        <p class="text-xs text-blue-700 font-semibold mb-2">🎯 Ad Spend</p>
+                        <p class="text-2xl font-bold text-blue-900 number-animate" id="adSpend">$267</p>
+                        <p class="text-xs text-blue-700 mt-1">(25%)</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4">
+                        <p class="text-xs text-emerald-700 font-semibold mb-2">🎨 Creatives</p>
+                        <p class="text-2xl font-bold text-emerald-900 number-animate" id="creatives">$300</p>
+                        <p class="text-xs text-emerald-700 mt-1">(27%)</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
+                        <p class="text-xs text-purple-700 font-semibold mb-2">📄 Landing Pages</p>
+                        <p class="text-2xl font-bold text-purple-900 number-animate" id="landing">$200</p>
+                        <p class="text-xs text-purple-700 mt-1">(18%)</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-4">
+                        <p class="text-xs text-cyan-700 font-semibold mb-2">📧 Email</p>
+                        <p class="text-2xl font-bold text-cyan-900 number-animate" id="email">$150</p>
+                        <p class="text-xs text-cyan-700 mt-1">(14%)</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4">
+                        <p class="text-xs text-orange-700 font-semibold mb-2">⚙️ Manage</p>
+                        <p class="text-2xl font-bold text-orange-900 number-animate" id="manage">$183</p>
+                        <p class="text-xs text-orange-700 mt-1">(16%)</p>
+                    </div>
+                </div>
+
+                <!-- Budget Chart -->
+                <div class="mt-8">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Funnel Section -->
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">🎯 Funnel de Conversión Estimado</h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Funnel Visual -->
+                    <div>
+                        <div class="stage-label">📊 Impressiones</div>
+                        <div class="funnel-bar" style="background: linear-gradient(90deg, #3b82f6, #60a5fa); width: 100%;">
+                            <span id="impressionCount">44,500</span>
+                            <span class="text-xs">CPM $6</span>
+                        </div>
+
+                        <div class="stage-label">🖱️ Clicks (1.5% CTR)</div>
+                        <div class="funnel-bar" style="background: linear-gradient(90deg, #06b6d4, #22d3ee); width: 85%;">
+                            <span id="clickCount">668</span>
+                            <span class="text-xs">CPC $0.40</span>
+                        </div>
+
+                        <div class="stage-label">📝 Form Submissions (20% CVR)</div>
+                        <div class="funnel-bar" style="background: linear-gradient(90deg, #10b981, #34d399); width: 65%;">
+                            <span id="formCount">134</span>
+                            <span class="text-xs">CPL $18.65</span>
+                        </div>
+
+                        <div class="stage-label">✅ MQL (50% Qualification)</div>
+                        <div class="funnel-bar" style="background: linear-gradient(90deg, #f59e0b, #fbbf24); width: 45%;">
+                            <span id="mqlCount">67</span>
+                            <span class="text-xs">Leads nurturados</span>
+                        </div>
+
+                        <div class="stage-label">🎉 Agendados (50% SQL Conv)</div>
+                        <div class="funnel-bar" style="background: linear-gradient(90deg, #a855f7, #d8b4fe); width: 25%;">
+                            <span id="agendadosCount">33</span>
+                            <span class="text-xs">✓ Goal alcanzado</span>
+                        </div>
+                    </div>
+
+                    <!-- Funnel Chart -->
+                    <div>
+                        <canvas id="funnelChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Metrics Row -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-xs text-blue-700 font-semibold mb-1">CPL</p>
+                        <p class="text-2xl font-bold text-blue-900 number-animate" id="cplMetric">$18.65</p>
+                        <p class="text-xs text-blue-600 mt-1">Cost Per Lead</p>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-lg">
+                        <p class="text-xs text-emerald-700 font-semibold mb-1">CVR</p>
+                        <p class="text-2xl font-bold text-emerald-900">20%</p>
+                        <p class="text-xs text-emerald-600 mt-1">Form Conversion</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <p class="text-xs text-purple-700 font-semibold mb-1">ROAS</p>
+                        <p class="text-2xl font-bold text-purple-900 number-animate" id="roasMetric">12:1</p>
+                        <p class="text-xs text-purple-600 mt-1">Return on Ad Spend</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <p class="text-xs text-orange-700 font-semibold mb-1">CTR</p>
+                        <p class="text-2xl font-bold text-orange-900">1.5%</p>
+                        <p class="text-xs text-orange-600 mt-1">Click Through Rate</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Targeting Strategy -->
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">🎯 Estrategia de Targeting</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-l-4 border-blue-500">
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">👔 Job Titles</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>✓ Gerente de Energía</li>
+                            <li>✓ Director Sustentabilidad</li>
+                            <li>✓ Facility Manager</li>
+                            <li>✓ Gerente Operaciones</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border-l-4 border-emerald-500">
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">🏢 Industrias</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>✓ Manufactura</li>
+                            <li>✓ Retail/Comercio</li>
+                            <li>✓ Hospitales</li>
+                            <li>✓ Data Centers</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-l-4 border-purple-500">
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">📍 Geografía</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>✓ Colombia (expandible)</li>
+                            <li>✓ 50+ empleados</li>
+                            <li>✓ >$5K/mes energía</li>
+                            <li>✓ Seniority: Gerente+</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-xl border-l-4 border-cyan-500">
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">🎯 Intereses</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>✓ Energías renovables</li>
+                            <li>✓ Sustentabilidad</li>
+                            <li>✓ Eficiencia operativa</li>
+                            <li>✓ ESG/Compliance</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border-l-4 border-amber-500">
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">💡 Por Formulario</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>✓ Form A: "Ahorros"</li>
+                            <li>✓ Form B: "Demo"</li>
+                            <li>✓ A/B testing</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border-l-4 border-red-500">
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">❌ Exclusiones</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>✓ Competidores</li>
+                            <li>✓ Job-hoppers</li>
+                            <li>✓ Nivel entrada</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Creatives Strategy -->
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">🎨 Estrategia de Creatives</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Creative A -->
+                    <div class="border-2 border-blue-200 rounded-xl overflow-hidden hover:shadow-lg transition">
+                        <div class="bg-blue-500 text-white px-6 py-3">
+                            <h3 class="font-bold">📸 FORMAT A: Single Image</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="bg-gradient-to-br from-emerald-50 to-cyan-50 rounded-lg h-40 flex items-center justify-center mb-4">
+                                <p class="text-center text-sm text-gray-600">Dashboard de Ahorros</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 mb-1">HEADLINE</p>
+                                    <p class="font-semibold text-gray-900">"Reduce factura energía hasta 40%"</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 mb-1">CTA</p>
+                                    <p class="font-semibold text-blue-600">"Calcula tu ahorro en 2 min"</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 mb-1">TARGET AUDIENCE</p>
+                                    <p class="text-sm text-gray-700">Gerentes Energía, Manufactura</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Creative B -->
+                    <div class="border-2 border-purple-200 rounded-xl overflow-hidden hover:shadow-lg transition">
+                        <div class="bg-purple-500 text-white px-6 py-3">
+                            <h3 class="font-bold">🎬 FORMAT B: Carousel</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg h-40 flex items-center justify-center mb-4">
+                                <p class="text-center text-sm text-gray-600">3 Slides: Problema → Solución → ROI</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 mb-1">HEADLINE</p>
+                                    <p class="font-semibold text-gray-900">"Gestiona toda tu energía"</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 mb-1">CTA</p>
+                                    <p class="font-semibold text-purple-600">"Agendar demo exclusiva"</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 mb-1">TARGET AUDIENCE</p>
+                                    <p class="text-sm text-gray-700">Directores, Retail, Hospitales</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Creative Tips -->
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-lg mt-8">
+                    <p class="font-bold text-amber-900 mb-3">🎬 Recomendaciones Críticas</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-amber-800">
+                        <div>✓ 2 variaciones mínimo por creativo</div>
+                        <div>✓ 4 creatives nuevos cada 7 días</div>
+                        <div>✓ Testimonios: +15-25% CTR</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs Table -->
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">📈 KPIs & Benchmarks</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b-2 border-gray-300">
+                                <th class="text-left py-4 px-4 font-bold text-gray-900">Métrica</th>
+                                <th class="text-center py-4 px-4 font-bold text-gray-900">Target</th>
+                                <th class="text-center py-4 px-4 font-bold text-gray-900">Benchmark B2B</th>
+                                <th class="text-center py-4 px-4 font-bold text-gray-900">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="py-4 px-4 text-gray-700">CTR (Click-Through Rate)</td>
+                                <td class="text-center"><span class="badge badge-blue">1.5%</span></td>
+                                <td class="text-center text-sm text-gray-600">0.8-2%</td>
+                                <td class="text-center text-xs">Optimizar headlines</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-4 text-gray-700">CVR (Form Submission)</td>
+                                <td class="text-center"><span class="badge badge-green">20%</span></td>
+                                <td class="text-center text-sm text-gray-600">15-30%</td>
+                                <td class="text-center text-xs">Test form fields</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-4 text-gray-700">CPL (Cost Per Lead)</td>
+                                <td class="text-center"><span class="badge badge-purple">$18.65</span></td>
+                                <td class="text-center text-sm text-gray-600">$15-30</td>
+                                <td class="text-center text-xs">Refinar audience</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-4 text-gray-700">MQL → SQL</td>
+                                <td class="text-center"><span class="badge badge-green">50%</span></td>
+                                <td class="text-center text-sm text-gray-600">40-60%</td>
+                                <td class="text-center text-xs">Email nurture</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-4 text-gray-700">SQL → Agendado</td>
+                                <td class="text-center"><span class="badge badge-blue">50%</span></td>
+                                <td class="text-center text-sm text-gray-600">50-70%</td>
+                                <td class="text-center text-xs">Sales follow-up</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-4 text-gray-700">ROAS</td>
+                                <td class="text-center"><span class="badge badge-purple">12:1</span></td>
+                                <td class="text-center text-sm text-gray-600">8:1-15:1</td>
+                                <td class="text-center text-xs">Optimize spend</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">📅 Timeline de Implementación</h2>
+                <div class="relative">
+                    <div class="space-y-6">
+                        <div class="flex gap-6">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-purple-500 text-white font-bold">1</div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-lg text-gray-900">Semana 1-2: Setup</h3>
+                                <p class="text-gray-700 mt-1">✓ Crear landing pages (2) | Setup LinkedIn Ads Manager | Definir audience segmentos | Configurar tracking pixels</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-6">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-500 text-white font-bold">2</div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-lg text-gray-900">Semana 3-4: Launch</h3>
+                                <p class="text-gray-700 mt-1">✓ Producir 4 creatives | Setup email automation | Launch 2 campañas | Daily monitoring | Reporte inicial</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-6">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-500 text-white font-bold">3</div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-lg text-gray-900">Semana 5-8: Optimize</h3>
+                                <p class="text-gray-700 mt-1">✓ A/B testing creatives | Refine targeting | Optimize landing pages | CPL reduction focus | Weekly reports</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-6">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-orange-500 text-white font-bold">4</div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-lg text-gray-900">Mes 2-3+: Scale</h3>
+                                <p class="text-gray-700 mt-1">✓ Escalar presupuesto según performance | Expandir a nuevas industrias | Multi-channel expansion | Hit 30+ leads goal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-2xl shadow-2xl p-12">
+                <h2 class="text-3xl font-bold mb-4">🚀 ¿Listo para lanzar?</h2>
+                <p class="text-lg opacity-90 mb-6">Ajusta el presupuesto arriba para ver proyecciones personalizadas. Recomendamos comenzar con $1,100/mes durante 2-3 meses de prueba.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                        <p class="font-bold mb-2">Ventaja 1</p>
+                        <p class="text-sm opacity-90">ROI comprobado: 12:1 en lead-gen B2B</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                        <p class="font-bold mb-2">Ventaja 2</p>
+                        <p class="text-sm opacity-90">Target precision: Directores decisores</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                        <p class="font-bold mb-2">Ventaja 3</p>
+                        <p class="text-sm opacity-90">Escalable: 1x a 3x según resultados</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Budget Slider Logic
+        const budgetSlider = document.getElementById('budgetSlider');
+        const budgetDisplay = document.getElementById('budgetDisplay');
+
+        // Budget breakdown percentages
+        const percentages = {
+            adSpend: 0.25,
+            creatives: 0.27,
+            landing: 0.18,
+            email: 0.14,
+            manage: 0.16
+        };
+
+        function updateDashboard() {
+            const budget = parseInt(budgetSlider.value);
+            budgetDisplay.textContent = '$' + budget.toLocaleString();
+
+            // Update breakdown
+            document.getElementById('adSpend').textContent = '$' + Math.round(budget * percentages.adSpend).toLocaleString();
+            document.getElementById('creatives').textContent = '$' + Math.round(budget * percentages.creatives).toLocaleString();
+            document.getElementById('landing').textContent = '$' + Math.round(budget * percentages.landing).toLocaleString();
+            document.getElementById('email').textContent = '$' + Math.round(budget * percentages.email).toLocaleString();
+            document.getElementById('manage').textContent = '$' + Math.round(budget * percentages.manage).toLocaleString();
+
+            // Calculate funnel based on budget
+            const adSpendAmount = budget * percentages.adSpend;
+            const cpm = 6;
+            const impressions = Math.floor((adSpendAmount / cpm) * 1000);
+            const clicks = Math.floor(impressions * 0.015);
+            const forms = Math.floor(clicks * 0.2);
+            const mql = Math.floor(forms * 0.5);
+            const agendados = Math.floor(mql * 0.5);
+
+            // Update funnel display
+            document.getElementById('impressionCount').textContent = impressions.toLocaleString();
+            document.getElementById('clickCount').textContent = clicks.toLocaleString();
+            document.getElementById('formCount').textContent = forms.toLocaleString();
+            document.getElementById('mqlCount').textContent = mql.toLocaleString();
+            document.getElementById('agendadosCount').textContent = agendados.toLocaleString();
+
+            // Update metrics
+            const cpl = budget / forms || 0;
+            document.getElementById('cplMetric').textContent = '$' + cpl.toFixed(2);
+
+            // Update ROAS (assuming $220 average ticket value and 40% close rate)
+            const revenue = agendados * 220 * 0.4;
+            const roas = revenue / budget;
+            document.getElementById('roasMetric').textContent = roas.toFixed(1) + ':1';
+
+            // Update charts
+            updateBudgetChart(budget);
+            updateFunnelChart(impressions, clicks, forms, mql, agendados);
+        }
+
+        // Budget Chart
+        let budgetChart = null;
+        function updateBudgetChart(budget) {
+            const ctx = document.getElementById('budgetChart');
+            if (!ctx) return;
+
+            const data = {
+                'Ad Spend': Math.round(budget * percentages.adSpend),
+                'Creatives': Math.round(budget * percentages.creatives),
+                'Landing': Math.round(budget * percentages.landing),
+                'Email': Math.round(budget * percentages.email),
+                'Manage': Math.round(budget * percentages.manage)
+            };
+
+            if (budgetChart) budgetChart.destroy();
+
+            budgetChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        data: Object.values(data),
+                        backgroundColor: ['#3b82f6', '#10b981', '#a855f7', '#06b6d4', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // Funnel Chart
+        let funnelChart = null;
+        function updateFunnelChart(imp, click, form, mql, agendados) {
+            const ctx = document.getElementById('funnelChart');
+            if (!ctx) return;
+
+            if (funnelChart) funnelChart.destroy();
+
+            funnelChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Impressiones', 'Clicks', 'Forms', 'MQL', 'Agendados'],
+                    datasets: [{
+                        label: 'Volume',
+                        data: [imp, click, form, mql, agendados],
+                        backgroundColor: ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#a855f7']
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Event listener
+        budgetSlider.addEventListener('input', updateDashboard);
+
+        // Initial update
+        updateDashboard();
+    </script>
+</body>
+</html>
