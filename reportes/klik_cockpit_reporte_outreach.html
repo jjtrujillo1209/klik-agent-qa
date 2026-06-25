@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLIK · Reporte Outreach</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  background: #f4f5f7;
+  color: #1a1f2e;
+  padding: 32px 24px 64px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 36px; flex-wrap: wrap; gap: 12px;
+}
+.page-header h1 {
+  font-size: 24px; font-weight: 800; color: #1a1f2e;
+}
+.page-header .subtitle {
+  font-size: 13px; color: #7a8499; margin-top: 4px;
+}
+.date-pill {
+  background: #1a1f2e; color: #fff;
+  font-size: 12px; font-weight: 600;
+  padding: 7px 16px; border-radius: 20px;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #9aa3b5;
+  margin: 36px 0 14px;
+}
+
+/* ── Empresas interesadas ── */
+.interested-banner {
+  background: linear-gradient(135deg, #1a1f2e 0%, #2b3554 100%);
+  border-radius: 18px;
+  padding: 28px 28px 22px;
+  margin-bottom: 6px;
+}
+.interested-banner .banner-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #ffd166;
+  margin-bottom: 6px;
+}
+.interested-banner .banner-sub {
+  font-size: 14px; color: rgba(255,255,255,.6);
+  margin-bottom: 22px;
+}
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.company-card {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.company-card .cc-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ffd166; flex-shrink: 0;
+}
+.company-card .cc-name {
+  font-size: 13px; font-weight: 600; color: #fff; line-height: 1.3;
+}
+.company-card .cc-sub {
+  font-size: 11px; color: rgba(255,255,255,.45); margin-top: 1px;
+}
+
+/* ── Big number card ── */
+.big-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  margin-bottom: 16px;
+}
+.big-card .card-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #9aa3b5;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+}
+.big-card .card-label .label-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+
+/* ── Metric row inside cards ── */
+.metric-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f1f4;
+}
+.metric-row:last-child { border-bottom: none; }
+.metric-row .mr-label {
+  font-size: 14px; color: #5a6380; min-width: 160px;
+}
+.metric-row .mr-bar-wrap {
+  flex: 1; height: 8px; background: #f0f1f4;
+  border-radius: 4px; overflow: hidden;
+}
+.metric-row .mr-bar {
+  height: 100%; border-radius: 4px;
+  transition: width .6s ease;
+}
+.metric-row .mr-val {
+  font-size: 18px; font-weight: 800;
+  min-width: 64px; text-align: right;
+}
+.metric-row .mr-pct {
+  font-size: 12px; color: #9aa3b5;
+  min-width: 46px; text-align: right;
+}
+
+/* ── Hero numbers (top of each section) ── */
+.hero-nums {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.hero-num {
+  background: #f8f9fb;
+  border: 1px solid #e8eaf0;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+.hero-num .hn-val {
+  font-size: 32px; font-weight: 900; line-height: 1;
+  margin-bottom: 4px;
+}
+.hero-num .hn-label {
+  font-size: 11px; color: #9aa3b5; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .8px;
+  line-height: 1.4;
+}
+.hero-num.featured {
+  background: #fff8e8;
+  border-color: #ffd166;
+}
+.hero-num.featured .hn-val { color: #e6a700; }
+
+/* ── Funnel visual ── */
+.funnel-visual {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 20px 0;
+}
+.fv-step {
+  display: flex; align-items: center; gap: 14px;
+}
+.fv-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.fv-label { font-size: 14px; color: #5a6380; min-width: 150px; }
+.fv-bar-wrap {
+  flex: 1; height: 14px; background: #f0f1f4;
+  border-radius: 7px; overflow: hidden;
+}
+.fv-bar { height: 100%; border-radius: 7px; }
+.fv-num { font-size: 16px; font-weight: 800; min-width: 48px; text-align: right; }
+.fv-pct { font-size: 12px; color: #9aa3b5; min-width: 48px; text-align: right; }
+
+/* ── LinkedIn status grid ── */
+.li-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 600px) { .li-status-grid { grid-template-columns: 1fr 1fr; } }
+.li-status-box {
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.li-status-box .lsb-val {
+  font-size: 40px; font-weight: 900; line-height: 1;
+  margin-bottom: 6px;
+}
+.li-status-box .lsb-label {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .8px; line-height: 1.4;
+}
+.lsb-connected  { background: #edfaf3; }
+.lsb-connected  .lsb-val   { color: #0aab6d; }
+.lsb-connected  .lsb-label { color: #0aab6d; }
+.lsb-waiting    { background: #fff8e8; }
+.lsb-waiting    .lsb-val   { color: #e6a700; }
+.lsb-waiting    .lsb-label { color: #b8860b; }
+.lsb-notconn    { background: #fef1f3; }
+.lsb-notconn    .lsb-val   { color: #e05c7a; }
+.lsb-notconn    .lsb-label { color: #c0475f; }
+
+/* ── Company list (LinkedIn connected) ── */
+.conn-list {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 8px;
+}
+.conn-pill {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  border: 1px solid;
+}
+.cp-green  { background: #edfaf3; border-color: #85ddb0; color: #0a7a4e; }
+.cp-blue   { background: #eef4ff; border-color: #b0c8f7; color: #2a5ec9; }
+.cp-red    { background: #fef1f3; border-color: #f4b0bc; color: #b53a55; }
+.cp-orange { background: #fff8e8; border-color: #ffd980; color: #996600; }
+
+/* ── Sessions timeline ── */
+.sessions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px; margin-bottom: 20px;
+}
+.session-box {
+  background: #f8f9fb; border: 1px solid #e8eaf0;
+  border-radius: 12px; padding: 14px 16px;
+}
+.session-box .sb-date { font-size: 11px; color: #9aa3b5; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; }
+.session-box .sb-count { font-size: 28px; font-weight: 900; color: #1a1f2e; margin: 4px 0 2px; }
+.session-box .sb-detail { font-size: 12px; color: #7a8499; }
+
+/* ── Calls ── */
+.calls-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  margin-bottom: 20px;
+}
+@media (max-width: 560px) { .calls-row { grid-template-columns: repeat(2, 1fr); } }
+.call-box {
+  border-radius: 12px; padding: 16px; text-align: center;
+}
+.call-box .cb-val { font-size: 32px; font-weight: 900; line-height: 1; }
+.call-box .cb-label { font-size: 11px; font-weight: 700; margin-top: 5px; text-transform: uppercase; letter-spacing: .7px; }
+.cb-answered { background: #edfaf3; }
+.cb-answered .cb-val { color: #0aab6d; } .cb-answered .cb-label { color: #0a7a4e; }
+.cb-noanswer { background: #fef1f3; }
+.cb-noanswer .cb-val { color: #e05c7a; } .cb-noanswer .cb-label { color: #c0475f; }
+.cb-meeting  { background: #eef4ff; }
+.cb-meeting  .cb-val { color: #4f8ef7; } .cb-meeting  .cb-label { color: #2a5ec9; }
+.cb-nodata   { background: #f8f9fb; }
+.cb-nodata   .cb-val { color: #9aa3b5; } .cb-nodata   .cb-label { color: #9aa3b5; }
+
+/* ── Meeting highlight ── */
+.meeting-highlight {
+  background: #eef4ff;
+  border: 1.5px solid #b0c8f7;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.mh-icon { font-size: 28px; }
+.mh-title { font-size: 15px; font-weight: 800; color: #1a1f2e; }
+.mh-sub { font-size: 12px; color: #7a8499; margin-top: 3px; }
+
+/* ── Divider ── */
+.divider { height: 1px; background: #e8eaf0; margin: 8px 0; }
+
+/* ── Footer ── */
+.page-footer {
+  margin-top: 48px; padding-top: 20px;
+  border-top: 1px solid #e8eaf0;
+  font-size: 12px; color: #b0b8cc;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+
+@media (max-width: 600px) {
+  body { padding: 20px 16px 48px; }
+  .hero-nums { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────────────────────────── -->
+<div class="page-header">
+  <div>
+    <h1>Reporte Outreach · KLIK</h1>
+    <div class="subtitle">Correos · LinkedIn · Llamadas · Empresas con interés</div>
+  </div>
+  <div class="date-pill">25 junio 2026</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOQUE 0 · EMPRESAS CON INTERÉS
+════════════════════════════════════════════════════════════ -->
+<div class="interested-banner">
+  <div class="banner-title">🎯 Leads generados</div>
+  <div class="banner-sub">Se les hizo outreach proactivo y respondieron positivamente</div>
+  <div class="company-grid">
+    <div class="company-card">
+      <div class="cc-dot"></div>
+      <div>
+        <div class="cc-name">Lácteos La Esmeralda</div>
+        <div class="cc-sub">Industria Láctea</div>
+      </div>
+    </div>
+    <div class="company-card">
+      <div class="cc-dot"></div>
+      <div>
+        <div class="cc-name">Terpel</div>
+        <div class="cc-sub">Paula Velasco · Energía</div>
+      </div>
+    </div>
+    <div class="company-card">
+      <div class="cc-dot"></div>
+      <div>
+        <div class="cc-name">Lácteos Pasco</div>
+        <div class="cc-sub">Industria Láctea</div>
+      </div>
+    </div>
+    <div class="company-card">
+      <div class="cc-dot"></div>
+      <div>
+        <div class="cc-name">Incubadora Santander</div>
+        <div class="cc-sub">Avicultura</div>
+      </div>
+    </div>
+    <div class="company-card">
+      <div class="cc-dot"></div>
+      <div>
+        <div class="cc-name">Agrícola Cardenal</div>
+        <div class="cc-sub">Agro</div>
+      </div>
+    </div>
+    <div class="company-card">
+      <div class="cc-dot"></div>
+      <div>
+        <div class="cc-name">Winner Group</div>
+        <div class="cc-sub">Comercio</div>
+      </div>
+    </div>
+    <div class="company-card" style="background:rgba(255,209,102,.18);border-color:rgba(255,209,102,.5);flex-direction:column;align-items:flex-start;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="cc-dot" style="background:#ffd166;"></div>
+        <div class="cc-name">Motorysa</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+        <div class="cc-sub">Automotriz</div>
+        <span style="background:#ffd166;color:#7a5c00;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap;">📅 Agendado</span>
+      </div>
+    </div>
+    <div class="company-card" style="background:rgba(255,209,102,.18);border-color:rgba(255,209,102,.5);flex-direction:column;align-items:flex-start;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="cc-dot" style="background:#ffd166;"></div>
+        <div class="cc-name">Movistar Arena</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+        <div class="cc-sub">Entretenimiento</div>
+        <span style="background:#ffd166;color:#7a5c00;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap;">📅 Agendado</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOQUE 1 · CORREO ELECTRÓNICO
+════════════════════════════════════════════════════════════ -->
+<div class="section-label">01 · Correo electrónico</div>
+
+<div class="big-card">
+  <div class="card-label">
+    <span class="label-dot" style="background:#f7a84f;"></span>
+    Resultados de hoy — SendGrid · Jun 25, 2026
+  </div>
+
+  <!-- Números hero -->
+  <div class="hero-nums">
+    <div class="hero-num">
+      <div class="hn-val" style="color:#1a1f2e;">291</div>
+      <div class="hn-label">Correos<br>enviados</div>
+    </div>
+    <div class="hero-num">
+      <div class="hn-val" style="color:#0aab6d;">264</div>
+      <div class="hn-label">Llegaron al<br>destinatario</div>
+    </div>
+    <div class="hero-num featured">
+      <div class="hn-val">174</div>
+      <div class="hn-label">Los abrieron<br><span style="color:#b8860b;font-size:13px;font-weight:800;">59.8%</span></div>
+    </div>
+    <div class="hero-num" style="background:#f0f4ff;border-color:#b0c8f7;">
+      <div class="hn-val" style="color:#4f8ef7;">25</div>
+      <div class="hn-label">Hicieron<br>click</div>
+    </div>
+    <div class="hero-num" style="background:#fef1f3;border-color:#f4b0bc;">
+      <div class="hn-val" style="color:#e05c7a;">26</div>
+      <div class="hn-label">Rebotaron<br>(no llegaron)</div>
+    </div>
+    <div class="hero-num" style="background:#edfaf3;border-color:#85ddb0;">
+      <div class="hn-val" style="color:#0aab6d;">0</div>
+      <div class="hn-label">Marcaron<br>como spam</div>
+    </div>
+  </div>
+
+  <!-- Funnel visual -->
+  <div style="font-size:12px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Lo que pasó con cada correo</div>
+  <div class="funnel-visual">
+    <div class="fv-step">
+      <div class="fv-icon">📤</div>
+      <div class="fv-label" style="color:#1a1f2e;font-weight:700;">Enviados</div>
+      <div class="fv-bar-wrap">
+        <div class="fv-bar" style="width:100%;background:#1a1f2e;"></div>
+      </div>
+      <div class="fv-num" style="color:#1a1f2e;">291</div>
+      <div class="fv-pct">100%</div>
+    </div>
+    <div class="fv-step">
+      <div class="fv-icon">✅</div>
+      <div class="fv-label" style="color:#0aab6d;font-weight:700;">Entregados</div>
+      <div class="fv-bar-wrap">
+        <div class="fv-bar" style="width:90.72%;background:#0aab6d;"></div>
+      </div>
+      <div class="fv-num" style="color:#0aab6d;">264</div>
+      <div class="fv-pct">90.7%</div>
+    </div>
+    <div class="fv-step">
+      <div class="fv-icon">👁️</div>
+      <div class="fv-label" style="color:#e6a700;font-weight:700;">Los abrieron</div>
+      <div class="fv-bar-wrap">
+        <div class="fv-bar" style="width:59.79%;background:#ffd166;"></div>
+      </div>
+      <div class="fv-num" style="color:#e6a700;">174</div>
+      <div class="fv-pct" style="color:#e6a700;font-weight:700;">59.8%</div>
+    </div>
+    <div class="fv-step">
+      <div class="fv-icon">🖱️</div>
+      <div class="fv-label" style="color:#4f8ef7;font-weight:700;">Hicieron click</div>
+      <div class="fv-bar-wrap">
+        <div class="fv-bar" style="width:8.59%;background:#4f8ef7;"></div>
+      </div>
+      <div class="fv-num" style="color:#4f8ef7;">25</div>
+      <div class="fv-pct">8.6%</div>
+    </div>
+  </div>
+
+  <!-- Nota de contexto -->
+  <div style="margin-top:20px;padding:14px 18px;background:#fffbef;border-radius:10px;border-left:3px solid #ffd166;font-size:13px;color:#7a6520;line-height:1.6;">
+    <strong style="color:#b8860b;">¿Qué significa el 59.8% de apertura?</strong><br>
+    Es muy buena señal. En campañas de correo frío (a personas que no te conocen), el promedio normal es 20-25%. Que casi 6 de cada 10 personas abran el correo indica que el asunto y el remitente están funcionando bien.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOQUE 2 · LINKEDIN
+════════════════════════════════════════════════════════════ -->
+<div class="section-label">02 · LinkedIn — Conexiones</div>
+
+<div class="big-card">
+  <div class="card-label">
+    <span class="label-dot" style="background:#4d9de0;"></span>
+    Estado de conexiones · verificado Jun 24, 2026
+  </div>
+
+  <!-- 3 grandes números -->
+  <div class="li-status-grid">
+    <div class="li-status-box lsb-connected">
+      <div class="lsb-val">31</div>
+      <div class="lsb-label">Ya conectados<br>Aceptaron ✓</div>
+    </div>
+    <div class="li-status-box lsb-waiting">
+      <div class="lsb-val">48</div>
+      <div class="lsb-label">Esperando<br>respuesta</div>
+    </div>
+    <div class="li-status-box lsb-notconn">
+      <div class="lsb-val">12</div>
+      <div class="lsb-label">No conectaron<br>Reintentar</div>
+    </div>
+  </div>
+
+  <!-- Sesiones -->
+  <div style="font-size:12px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Sesiones realizadas</div>
+  <div class="sessions">
+    <div class="session-box">
+      <div class="sb-date">10 Jun</div>
+      <div class="sb-count">19</div>
+      <div class="sb-detail">4 con mensaje personalizado</div>
+    </div>
+    <div class="session-box">
+      <div class="sb-date">16 Jun · Mañana</div>
+      <div class="sb-count">12</div>
+      <div class="sb-detail">Sin mensaje adicional</div>
+    </div>
+    <div class="session-box">
+      <div class="sb-date">16 Jun · Tarde</div>
+      <div class="sb-count">16</div>
+      <div class="sb-detail">Sin mensaje adicional</div>
+    </div>
+    <div class="session-box">
+      <div class="sb-date">17 Jun</div>
+      <div class="sb-count">14</div>
+      <div class="sb-detail">Última sesión</div>
+    </div>
+  </div>
+
+  <!-- Empresas que aceptaron -->
+  <div style="font-size:12px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Empresas que aceptaron la conexión (31)</div>
+  <div class="conn-list">
+    <span class="conn-pill cp-green">AAK Colombia</span>
+    <span class="conn-pill cp-green">Aguas de Cartagena</span>
+    <span class="conn-pill cp-green">Banco de Bogotá</span>
+    <span class="conn-pill cp-green">Bancolombia</span>
+    <span class="conn-pill cp-green">Cementos Argos</span>
+    <span class="conn-pill cp-green">Club de Pesca Ctagena</span>
+    <span class="conn-pill cp-green">Corbeta / Alkosto</span>
+    <span class="conn-pill cp-green">Colsubsidio</span>
+    <span class="conn-pill cp-green">Hielos Iglú</span>
+    <span class="conn-pill cp-green">Groupe SEB Colombia</span>
+    <span class="conn-pill cp-green">Hada International</span>
+    <span class="conn-pill cp-green">Industrias Estra</span>
+    <span class="conn-pill cp-green">Lab. Incobra</span>
+    <span class="conn-pill cp-green">Lácteos del Cesar</span>
+    <span class="conn-pill cp-green">Olímpica</span>
+    <span class="conn-pill cp-green">Palma / Grasas</span>
+    <span class="conn-pill cp-green">Puerta de Oro</span>
+    <span class="conn-pill cp-green">Tec. en Cubrimiento</span>
+    <span class="conn-pill cp-green">Triple A</span>
+    <span class="conn-pill cp-green">U. de Los Andes</span>
+    <span class="conn-pill cp-green">Centro Comercial (2)</span>
+    <span class="conn-pill cp-green" style="background:#fff8e8;border-color:#ffd166;color:#7a5c00;font-weight:800;">⭐ Winner Group</span>
+    <span class="conn-pill cp-green">Otros 10 sin registrar</span>
+  </div>
+
+  <div class="divider" style="margin:20px 0;"></div>
+
+  <!-- Esperando respuesta -->
+  <div style="font-size:12px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Solicitud enviada — esperando respuesta (12)</div>
+  <div class="conn-list">
+    <span class="conn-pill cp-blue">Agro Inversiones</span>
+    <span class="conn-pill cp-blue">Clínica Colsanitas</span>
+    <span class="conn-pill cp-blue">Coaspharma</span>
+    <span class="conn-pill cp-blue">Colombina</span>
+    <span class="conn-pill cp-blue">Extrusiones</span>
+    <span class="conn-pill cp-blue">Flores El Trigal</span>
+    <span class="conn-pill cp-blue">Gases Industriales</span>
+    <span class="conn-pill cp-blue">Holcim Colombia</span>
+    <span class="conn-pill cp-blue">Telas Lafayette</span>
+    <span class="conn-pill cp-blue">Rafael del Castillo</span>
+    <span class="conn-pill cp-blue">Centro Comercial</span>
+  </div>
+
+  <div class="divider" style="margin:20px 0;"></div>
+
+  <!-- No conectaron -->
+  <div style="font-size:12px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">No conectaron — revisar perfil (12)</div>
+  <div class="conn-list">
+    <span class="conn-pill cp-red">W. Tuberquia Restrepo</span>
+    <span class="conn-pill cp-red">J.E. Poveda Urrego</span>
+    <span class="conn-pill cp-red">G. Pulgarín Pérez</span>
+    <span class="conn-pill cp-red">Andrés Arroyave</span>
+    <span class="conn-pill cp-red">Luz Molina</span>
+    <span class="conn-pill cp-red">Pablo Mejía</span>
+    <span class="conn-pill cp-red">Andrés Bello</span>
+    <span class="conn-pill cp-red">Erick Gómez</span>
+    <span class="conn-pill cp-red">Juan Garavito</span>
+    <span class="conn-pill cp-red">Juan Madriñán</span>
+    <span class="conn-pill cp-red">Luis Ochoa</span>
+    <span class="conn-pill cp-red">Santiago Cardona</span>
+  </div>
+
+  <!-- Pendientes en base -->
+  <div style="margin-top:20px;padding:14px 18px;background:#f8f9fb;border-radius:10px;border:1px solid #e8eaf0;display:flex;align-items:center;gap:16px;">
+    <div style="font-size:36px;font-weight:900;color:#9aa3b5;">278</div>
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#1a1f2e;">Contactos en lista para próximas sesiones</div>
+      <div style="font-size:12px;color:#9aa3b5;margin-top:3px;">Base <code>KLIK_BASE_PENDIENTES_CONEXION.csv</code> — listos para enviar solicitud</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOQUE 3 · LLAMADAS
+════════════════════════════════════════════════════════════ -->
+<div class="section-label">03 · Llamadas de seguimiento</div>
+
+<div class="big-card">
+  <div class="card-label">
+    <span class="label-dot" style="background:#9b6ccc;"></span>
+    9 llamadas realizadas · <span style="color:#4f8ef7;">2 reuniones agendadas</span>
+  </div>
+
+  <div class="calls-row">
+    <div class="call-box cb-answered">
+      <div class="cb-val">3</div>
+      <div class="cb-label">Contestaron</div>
+    </div>
+    <div class="call-box cb-noanswer">
+      <div class="cb-val">4</div>
+      <div class="cb-label">No contestaron</div>
+    </div>
+    <div class="call-box cb-meeting">
+      <div class="cb-val">2</div>
+      <div class="cb-label">Reuniones agendadas</div>
+    </div>
+    <div class="call-box cb-nodata">
+      <div class="cb-val">1</div>
+      <div class="cb-label">Sin registro</div>
+    </div>
+  </div>
+
+  <!-- Reuniones agendadas highlight -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div class="meeting-highlight">
+      <div class="mh-icon">📅</div>
+      <div>
+        <div class="mh-title">Motorysa · Reunión agendada</div>
+        <div class="mh-sub">Automotriz · Outreach proactivo con respuesta positiva</div>
+      </div>
+    </div>
+    <div class="meeting-highlight">
+      <div class="mh-icon">📅</div>
+      <div>
+        <div class="mh-title">Movistar Arena · Reunión agendada</div>
+        <div class="mh-sub">Entretenimiento · Outreach proactivo con respuesta positiva</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalle llamadas -->
+  <div style="margin-top:20px;">
+    <div style="font-size:12px;font-weight:700;color:#9aa3b5;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Detalle de las 9 llamadas</div>
+    <div>
+      <div class="metric-row">
+        <span class="mr-label">✅ gerencia@acmeleon.com</span>
+        <span style="font-size:12px;background:#edfaf3;color:#0a7a4e;padding:3px 10px;border-radius:20px;font-weight:700;">Contestó</span>
+        <span class="mr-pct">19 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">✅ jdmesabernal@gmail.com</span>
+        <span style="font-size:12px;background:#edfaf3;color:#0a7a4e;padding:3px 10px;border-radius:20px;font-weight:700;">Contestó</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">✅ raficog@hotmail.com</span>
+        <span style="font-size:12px;background:#edfaf3;color:#0a7a4e;padding:3px 10px;border-radius:20px;font-weight:700;">Contestó</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">📅 operaciones@unicentrogirardot</span>
+        <span style="font-size:12px;background:#eef4ff;color:#2a5ec9;padding:3px 10px;border-radius:20px;font-weight:700;">Agendó</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">❌ andres.valencia@haceb.com</span>
+        <span style="font-size:12px;background:#fef1f3;color:#c0475f;padding:3px 10px;border-radius:20px;font-weight:700;">No contestó</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">❌ opav@opav.co</span>
+        <span style="font-size:12px;background:#fef1f3;color:#c0475f;padding:3px 10px;border-radius:20px;font-weight:700;">No contestó</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">❌ jhenao@santafe.com.co</span>
+        <span style="font-size:12px;background:#fef1f3;color:#c0475f;padding:3px 10px;border-radius:20px;font-weight:700;">No contestó</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">❌ ovillafane@winnergroup.com</span>
+        <span style="font-size:12px;background:#fef1f3;color:#c0475f;padding:3px 10px;border-radius:20px;font-weight:700;">No contestó</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+      <div class="metric-row">
+        <span class="mr-label">— carlos.vergara@uniphos.com</span>
+        <span style="font-size:12px;background:#f8f9fb;color:#9aa3b5;padding:3px 10px;border-radius:20px;font-weight:700;">Sin registro</span>
+        <span class="mr-pct">22 Jun</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<div class="page-footer">
+  <span><strong style="color:#1a1f2e;">KLIK Energy</strong> · Reporte Outreach</span>
+  <span>25 jun 2026 · Fuentes: SendGrid · connection_status.json · call_log.json</span>
+</div>
+
+</body>
+</html>
